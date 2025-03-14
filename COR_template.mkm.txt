@@ -1,0 +1,238 @@
+scaler = 'ThermodynamicScaler'
+
+rxn_expressions = [
+    'H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65',	# Volmer 1
+    'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65',     # Heyrovsky 2
+    'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t',     # Tafel 3
+    'OH*_t + H_g + ele_g <-> H2O_g + *_t',	#4
+
+    'CO_g + *_t <-> CO*_t',	#5
+    'CHO*_t + H_g + ele_g <-> CHO-H-ele*_t <-> CHOH*_t; beta=0.5',	#6
+    'CHOH*_t + H_g + ele_g <-> CHOH-H-ele*_t <-> CH*_t + H2O_g; beta=0.5',	#7
+    'CH*_t + H_g + ele_g <-> CH-H-ele*_t <-> CH2*_t; beta=0.5',	#8
+    'CH2*_t + H_g + ele_g <-> CH2-H-ele*_t <-> CH3*_t; beta=0.5',	#9
+    'CH3*_t + H_g + ele_g <-> CH3-H-ele*_t <-> CH4_g + *_t; beta=0.5',	#10
+    #'CH*_t + H_g + ele_g <-> CH2*_t',	#8
+    #'CH2*_t + H_g + ele_g <-> CH3*_t',	#9
+    #'CH3*_t + H_g + ele_g <-> CH4_g + *_t',	#10
+
+    'CO*_t + H_g + ele_g <-> CO-H-ele*_t <-> COH*_t; beta=0.5',	# Electro_COH 11
+    'COH*_t + H_g + ele_g <-> COH-H-ele*_t <-> C*_t + H2O_g; beta = 0.45',	#12
+    'C*_t + H_g + ele_g <-> C-H-ele*_t <-> CH*_t; beta=0.6',	#13
+
+    'CO*_t + H*_t <-> H-CO*_t + *_t <-> CHO*_t + *_t', # Thermo_CHO 14
+    'COH*_t + H*_t <-> COH-H*_t + *_t <-> CHOH*_t + *_t', # Thermo_CHOH 15
+    'C*_t + H*_t <-> C-H*_t + *_t <-> CH*_t + *_t',	#16
+    'CH*_t + H*_t <-> CH-H*_t + *_t <-> CH2*_t + *_t',	#17
+    'CH2*_t + H*_t <-> CH2-H*_t + *_t <-> CH3*_t + *_t',	#18
+    'CH3*_t + H*_t <-> CH3-H*_t + *_t <-> CH4_g + 2*_t',	#19
+
+    'O2_g + *_t -> O2*_t',     #20 fake ads
+    
+    'CO*_t + C*_t <-> OC-C*_t <-> OCC*_t + *_t', #Thermo_CCO_surface 21
+    'CO_g + C*_t <-> C-CO*_t <-> OCC*_t', #Thermo_CCO_gas 22
+    'OCC*_t + H_g + ele_g <-> OCC-H-ele_t <-> OCCH_t; beta=0.5', #23    
+    #'OCC*_t + H_g + ele_g <-> OCCH_t', #23
+    'OCCH*_t + 5H_g + 5ele_g <-> C2H4_g + H2O_g + *_t', #24
+    '2CH2*_t <-> CH2-CH2*_t <-> C2H4_g + 2*_t', # CH2-CH2 coupling 25
+    
+    '2CO_t <-> OCCO_t', # OCCO dimerization 26
+    'OCCO_t + H_g + ele_g <-> OCCO-H-ele_t <-> OCCOH_t; beta=0.5', # 27
+    'OCCOH_t + H_g + ele_g <-> OCC_t + H2O_g + *_t', # 28
+    'CO_t + CH_t <-> OC-CH_t <-> OCCH_t + *_t', #29
+    
+    'CO*_t + H_g + ele_g <-> H-CO-ele*_t <-> CHO*_t; beta=0.5',	# Electro_CHO #30
+]
+
+prefactor_list = [1e13]*len(rxn_expressions)  #Heine: prefactor for CO is 1e8
+
+surface_names = ['Cu']
+
+descriptor_names= ['voltage', 'temperature'] #descriptor names
+
+descriptor_ranges = [[$voltage1,$voltage2],[$temperature,$temperature]]
+
+resolution = [$resolution, 1]
+
+beta = 0.5
+
+species_definitions = {}
+species_definitions['H_g'] = {'pressure':1.0}
+species_definitions['ele_g'] = {'pressure':1.0, 'composition':{}}
+species_definitions['CO_g'] = {'pressure':$co2_activity}
+species_definitions['H2_g'] = {'pressure':0.0}
+species_definitions['H2O_g'] = {'pressure':0.035}
+species_definitions['CH4_g'] = {'pressure':0.0}
+species_definitions['O2_g'] = {'pressure':0.0}
+species_definitions['C2H4_g'] = {'pressure':0.0}
+
+species_definitions['t'] = {'site_names': ['100'], 'total':1.0}
+
+data_file = 'COR_pH7.pkl'
+input_file = 'input.txt'
+
+gas_thermo_mode = 'ideal_gas' 
+adsorbate_thermo_mode = 'harmonic_adsorbate'
+electrochemical_thermo_mode = 'simple_electrochemical'
+
+decimal_precision = 100
+tolerance = 1e-35
+max_rootfinding_iterations = 200
+max_bisections = 5
+
+# scale by [H, O2, constant]
+scaling_constraint_dict = {
+		'C_t':['+',0.,None],		
+		'CH_t':['+',0.,None],
+		'CH2_t':['+',0.,None],
+		'CH3_t':['+',0.,None],
+		'OH_t':['+',0.,None],
+		'CHOH_t':['+',0.,None],
+		'COH_t':['+',0.,None],
+		'CHO_t':['+',0.,None],
+		'H_t':['+',0.,None],
+		'H-H_t':'initial_state',
+		'H-ele_t':'final_state',
+		'H2-ele_t':'initial_state',                                      
+		'H-CO_t':'initial_state',                                      
+		#'H-CO-ele_t': 'TS(CO_s):[0.65,0.86]',
+                          }
+
+rxn_mechanisms = {
+	'C1_via_CO-H-ele': [5, 11, 12, 13, 8, 9 ,10],
+	'C1_via_H-CO': [5, 1, 14, 6, 7, 8, 9, 10],
+	'C2_via_OCCOH': [5, 5, 26, 27, 28, 23, 24],
+	'C2_via_C-CO': [5, 11, 12, 22, 23, 24],
+	'C2_via_CH-CO': [5, 11, 12, 13, 5, 29, 24],	
+	'C2_via_CH2-CH2': [5, 11, 12, 13, 8, 5, 11, 12, 13, 8, 25],	
+	'HER_Heyrovsky': [5, 1, 2],
+}
+
+adsorbate_interaction_model = 'first_order' #use "single site" interaction model
+
+interaction_response_function = 'smooth_piecewise_linear' #use "smooth piecewise linear" interactions
+
+interaction_fitting_mode = None
+cross_interaction_mode = 'geometric_mean' #use geometric mean for cross parameters
+
+interaction_scaling_constraint_dict = {
+				'CO_t':[0,0,None],
+				'H_t':[0,0,None],
+				'OH_t':[0,0,None],
+				'COH_t':[0,0,None],
+				'CHO_t':[0,0,None],
+				'C_t':[0,0,None],
+				'CH_t':[0,0,None],
+				'CH2_t':[0,0,None],
+				'CH3_t':[0,0,None],
+                          }
+
+interaction_strength = $strength
+
+if 1 == len(surface_names):
+	numBeforePt = 0
+	numAfterPt = 0
+else:
+	numBeforePt = len(surface_names)-surface_names.index('Pt')
+	numAfterPt = len(surface_names)-numBeforePt-1
+	transition_state_cross_interaction_mode = 'transition_state_scaling' #use TS scaling for TS interaction
+
+species_definitions['t']['interaction_response_parameters'] = {'cutoff':0.25,'smoothing':0.05}
+
+eHCO=0.7274
+eCO=2.4670
+eH=0.0
+
+species_definitions['CO_t'] = {
+		'self_interaction_parameter':[None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'cross_interaction_parameters':{
+		'H_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'H-ele_t': [None]*numBeforePt+[eHCO*1.08]+[None]*numAfterPt,
+		'H2-ele_t': [None]*numBeforePt+[eHCO*0.7]+[None]*numAfterPt,
+		'H-H_t': [None]*numBeforePt+[eHCO*1.59]+[None]*numAfterPt,
+		'H-CO-ele_t': [None]*numBeforePt+[eCO*1.]+[None]*numAfterPt,
+		'CHO_t': [None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'CO-H-ele_t': [None]*numBeforePt+[1.*eCO]+[None]*numAfterPt,
+		'COH_t': [None]*numBeforePt+[1.*eCO]+[None]*numAfterPt,
+		'COH-H-ele_t': [None]*numBeforePt+[1*eCO]+[None]*numAfterPt,
+		'C_t': [None]*numBeforePt+[1*eCO]+[None]*numAfterPt,
+		'C-H-ele_t': [None]*numBeforePt+[1*eCO]+[None]*numAfterPt,
+		'CH_t': [None]*numBeforePt+[0.75*eCO]+[None]*numAfterPt,
+		'CH2_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'CH-H-ele_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'CH2-H-ele_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'H-CO_t': [None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'OC-C_t': [None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'C-CO_t': [None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'OCC_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'OCC-H-ele_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'OCCH_t': [None]*numBeforePt+[0.3*eCO]+[None]*numAfterPt,
+		'OC-CH_t': [None]*numBeforePt+[eCO]+[None]*numAfterPt,
+		'OCCO_t': [None]*numBeforePt+[1.2*eCO]+[None]*numAfterPt,
+		'OCCO-H-ele_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,
+		'OCCOH_t': [None]*numBeforePt+[0.5*eCO]+[None]*numAfterPt,	
+			}
+		}
+
+species_definitions['OH_t'] = {
+		'self_interaction_parameter':[None]*numBeforePt+[1.0330]+[None]*numAfterPt,
+		}
+
+species_definitions['H_t'] = {
+		'cross_interaction_parameters':{
+		'H-ele_t': [None]*numBeforePt+[eH*1.08]+[None]*numAfterPt,
+		'H2-ele_t': [None]*numBeforePt+[eH*0.7]+[None]*numAfterPt,
+		'H-H_t': [None]*numBeforePt+[eH*1.59]+[None]*numAfterPt,
+		'H-CO-ele_t': [None]*numBeforePt+[eHCO*1.]+[None]*numAfterPt,
+		'CHO_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'CO-H-ele_t': [None]*numBeforePt+[1.*eHCO]+[None]*numAfterPt,
+		'COH_t': [None]*numBeforePt+[1.*eHCO]+[None]*numAfterPt,
+		'COH-H-ele_t': [None]*numBeforePt+[1*eHCO]+[None]*numAfterPt,
+		'C_t': [None]*numBeforePt+[1*eHCO]+[None]*numAfterPt,
+		'C-H-ele_t': [None]*numBeforePt+[1*eHCO]+[None]*numAfterPt,
+		'CH_t': [None]*numBeforePt+[0.75*eHCO]+[None]*numAfterPt,
+		'CH2_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'CH-H-ele_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'CH2-H-ele_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'H-CO_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'OC-C_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'C-CO_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'OCC_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'OCC-H-ele_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'OCCH_t': [None]*numBeforePt+[0.3*eHCO]+[None]*numAfterPt,
+		'OC-CH_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'OCCO_t': [None]*numBeforePt+[1.2*eHCO]+[None]*numAfterPt,
+		'OCCO-H-ele_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,
+		'OCCOH_t': [None]*numBeforePt+[0.5*eHCO]+[None]*numAfterPt,	
+			}
+		}
+
+species_definitions['OCCO_t'] = {
+		'self_interaction_parameter':[None]*numBeforePt+[1.2*eCO]+[None]*numAfterPt,
+		'cross_interaction_parameters':{
+		'H_t': [None]*numBeforePt+[eHCO]+[None]*numAfterPt,
+		'H-ele_t': [None]*numBeforePt+[eHCO*1.08]+[None]*numAfterPt,
+		'H2-ele_t': [None]*numBeforePt+[eHCO*0.39]+[None]*numAfterPt,
+		'H-H_t': [None]*numBeforePt+[eHCO*1.59]+[None]*numAfterPt,
+		#'H-CO-ele_t': [None]*numBeforePt+[eCO*1.]+[None]*numAfterPt,
+		#'CO-H-ele_t': [None]*numBeforePt+[1.24*eCO*2.22]+[None]*numAfterPt,
+		#'COH-H-ele_t': [None]*numBeforePt+[1.24*eCO*2.22]+[None]*numAfterPt,
+		#'H-CO_t': [None]*numBeforePt+[1.24*eCO*1.]+[None]*numAfterPt,
+                        },
+                'n_sites':2
+                }
+
+
+for species in ['OC-CO_t', 'OCCO-H-ele_t', 'OCCOH_t', 'CH2-CH2_t', 'OC-C_t', 'OC-CH_t']:
+	species_definitions[species] = species_definitions['OCCO_t']
+                
+
+for species in ['OCC_t', 'OCC-H-ele_t', 'OCCH_t', 'C_t', 'CH_t', 'CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'COH_t']:
+	species_definitions[species] = species_definitions['CO_t']
+'''
+species_definitions['COH_t'] = {
+		'self_interaction_parameter':[None]*numBeforePt+[1.75*eCO]+[None]*numAfterPt,
+		}
+'''
+
+
