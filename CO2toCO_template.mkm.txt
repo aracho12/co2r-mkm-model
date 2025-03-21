@@ -28,14 +28,14 @@ species_definitions = {}
 species_definitions['t'] = {'site_names': ['100','211'], 'total':1.0}
 species_definitions['H_g'] = {'pressure':1.0}
 species_definitions['ele_g'] = {'pressure':1.0, 'composition':{}}
-species_definitions['CO2_g'] = {'pressure':1.906143823529412}
-species_definitions['CO_g'] = {'pressure':0.00}
-species_definitions['H2_g'] = {'pressure':0.0}
-#species_definitions['H2O_g'] = {'pressure':0.035}
-species_definitions['H2O_g'] = {'pressure':1.0}
-species_definitions['CH4_g'] = {'pressure':0.0}
-species_definitions['O2_g'] = {'pressure':0.0}
-species_definitions['C2H4_g'] = {'pressure':0.0}
+species_definitions['CO_g'] = {'pressure':0.055}
+species_definitions['H2_g'] = {'pressure':0.3}
+species_definitions['H2O_g'] = {'pressure':0.035}
+species_definitions['CH4_g'] = {'pressure':0.202}
+species_definitions['O2_g'] = {'pressure':1.0}
+species_definitions['C2H4_g'] = {'pressure':0.138} 
+species_definitions['CO2_g'] = {'pressure':1.0}
+species_definitions['HCOOH_g'] = {'pressure':0.00002}
 
 
 species_definitions['COOH_t'] = {'n_sites':2}
