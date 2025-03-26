@@ -1,0 +1,295 @@
+from numpy import array
+
+try:
+    import cPickle as pickle
+
+except: #workaround for python3.X
+    import _pickle as pickle
+
+
+from mpmath import mpf 
+
+parser = None
+
+scaler = 'ThermodynamicScaler'
+
+thermodynamics = 'ThermoCorrections'
+
+solver = 'SteadyStateSolver'
+
+mapper = 'MinResidMapper'
+
+binary_data = pickle.load(open("COR_pH7.pkl","rb"))
+
+locals().update(binary_data)
+
+A_uc = None
+
+adsorbate_interaction_model = 'first_order'
+
+adsorbate_names = ('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t')
+
+adsorbate_thermo_mode = 'harmonic_adsorbate'
+
+analytical_jacobian = True
+
+atomic_reservoir_dict = {'C': 'CO_g', 'H': 'H_g', 'O': 'O2_g'}
+
+atomic_reservoir_list = [{'C': 'C2H4_g', 'H': 'CH4_g', 'O': 'CO_g'}, {'C': 'C2H4_g', 'H': 'CH4_g', 'O': 'H2O_g'}, {'C': 'C2H4_g', 'H': 'CH4_g', 'O': 'O2_g'}, {'C': 'C2H4_g', 'H': 'H2O_g', 'O': 'CO_g'}, {'C': 'C2H4_g', 'H': 'H2O_g', 'O': 'O2_g'}, {'C': 'C2H4_g', 'H': 'H2_g', 'O': 'CO_g'}, {'C': 'C2H4_g', 'H': 'H2_g', 'O': 'H2O_g'}, {'C': 'C2H4_g', 'H': 'H2_g', 'O': 'O2_g'}, {'C': 'C2H4_g', 'H': 'H_g', 'O': 'CO_g'}, {'C': 'C2H4_g', 'H': 'H_g', 'O': 'H2O_g'}, {'C': 'C2H4_g', 'H': 'H_g', 'O': 'O2_g'}, {'C': 'CH4_g', 'H': 'H2O_g', 'O': 'CO_g'}, {'C': 'CH4_g', 'H': 'H2O_g', 'O': 'O2_g'}, {'C': 'CH4_g', 'H': 'H2_g', 'O': 'CO_g'}, {'C': 'CH4_g', 'H': 'H2_g', 'O': 'H2O_g'}, {'C': 'CH4_g', 'H': 'H2_g', 'O': 'O2_g'}, {'C': 'CH4_g', 'H': 'H_g', 'O': 'CO_g'}, {'C': 'CH4_g', 'H': 'H_g', 'O': 'H2O_g'}, {'C': 'CH4_g', 'H': 'H_g', 'O': 'O2_g'}, {'C': 'CO_g', 'H': 'C2H4_g', 'O': 'O2_g'}, {'C': 'CO_g', 'H': 'CH4_g', 'O': 'O2_g'}, {'C': 'CO_g', 'H': 'H2O_g', 'O': 'O2_g'}, {'C': 'CO_g', 'H': 'H2_g', 'O': 'H2O_g'}, {'C': 'CO_g', 'H': 'H2_g', 'O': 'O2_g'}, {'C': 'CO_g', 'H': 'H_g', 'O': 'H2O_g'}, {'C': 'CO_g', 'H': 'H_g', 'O': 'O2_g'}]
+
+beta = 0.5
+
+coverage_headers = ['coverage', 'coadsorbate_coverage']
+
+cross_interaction_mode = 'geometric_mean'
+
+data_file = 'COR_pH7.pkl'
+
+decimal_precision = 100
+
+default_self_interaction_parameter = 0
+
+descriptor_decimal_precision = 2
+
+descriptor_names = ('voltage', 'temperature')
+
+descriptor_ranges = [[-1.4, 0.0], [300, 300]]
+
+eCO = 2.467
+
+eH = 0.0
+
+eHCO = 0.7274
+
+echem_transition_state_names = []
+
+electrochemical_thermo_mode = 'simple_electrochemical'
+
+elementary_rxns = ([['H_g', 'ele_g', 't'], ['H-ele_t'], ['H_t']], [['H_g', 'ele_g', 'H_t'], ['H2-ele_t'], ['H2_g', 't']], [['H_t', 'H_t'], ['H-H_t', 't'], ['H2_g', 't', 't']], [['OH_t', 'H_g', 'ele_g'], ['H2O_g', 't']], [['CO_g', 't'], ['CO_t']], [['CHO_t', 'H_g', 'ele_g'], ['CHO-H-ele_t'], ['CHOH_t']], [['CHOH_t', 'H_g', 'ele_g'], ['CHOH-H-ele_t'], ['CH_t', 'H2O_g']], [['CH_t', 'H_g', 'ele_g'], ['CH-H-ele_t'], ['CH2_t']], [['CH2_t', 'H_g', 'ele_g'], ['CH2-H-ele_t'], ['CH3_t']], [['CH3_t', 'H_g', 'ele_g'], ['CH3-H-ele_t'], ['CH4_g', 't']], [['CO_t', 'H_g', 'ele_g'], ['CO-H-ele_t'], ['COH_t']], [['COH_t', 'H_g', 'ele_g'], ['COH-H-ele_t'], ['C_t', 'H2O_g']], [['C_t', 'H_g', 'ele_g'], ['C-H-ele_t'], ['CH_t']], [['CO_t', 'H_t'], ['H-CO_t', 't'], ['CHO_t', 't']], [['COH_t', 'H_t'], ['COH-H_t', 't'], ['CHOH_t', 't']], [['C_t', 'H_t'], ['C-H_t', 't'], ['CH_t', 't']], [['CH_t', 'H_t'], ['CH-H_t', 't'], ['CH2_t', 't']], [['CH2_t', 'H_t'], ['CH2-H_t', 't'], ['CH3_t', 't']], [['CH3_t', 'H_t'], ['CH3-H_t', 't'], ['CH4_g', 't', 't']], [['O2_g', 't'], ['O2_t']], [['CO_t', 'C_t'], ['OC-C_t'], ['OCC_t', 't']], [['CO_g', 'C_t'], ['C-CO_t'], ['OCC_t']], [['OCC_t', 'H_g', 'ele_g'], ['OCC-H-ele_t'], ['OCCH_t']], [['OCCH_t', 'H_g', 'H_g', 'H_g', 'H_g', 'H_g', 'ele_g', 'ele_g', 'ele_g', 'ele_g', 'ele_g'], ['C2H4_g', 'H2O_g', 't']], [['CH2_t', 'CH2_t'], ['CH2-CH2_t'], ['C2H4_g', 't', 't']], [['CO_t', 'CO_t'], ['OCCO_t']], [['OCCO_t', 'H_g', 'ele_g'], ['OCCO-H-ele_t'], ['OCCOH_t']], [['OCCOH_t', 'H_g', 'ele_g'], ['OCC_t', 'H2O_g', 't']], [['CO_t', 'CH_t'], ['OC-CH_t'], ['OCCH_t', 't']], [['CO_t', 'H_g', 'ele_g'], ['H-CO-ele_t'], ['CHO_t']])
+
+estimate_frequencies = True
+
+extrapolate_coverages = False
+
+fixed_entropy_dict = {'H2_g': 0.00135, 'other': 0.002}
+
+force_recalculation = True
+
+force_recompilation = False
+
+frequency_dict = {'H_g': [], 'ele_g': [], 'CO_g': [0.004083343841532469, 0.006033504316662417, 0.2666271947115115], 'H2_g': [0.0008195024527149362, 0.0009190869911306729, 0.5512386313767775], 'H2O_g': [0.002781813471956813, 0.003436715035383926, 0.009369120703280782, 0.20016403465901214, 0.4633180622538471, 0.47707975612222003], 'CH4_g': [0.006776742531394076, 0.008881882847557952, 0.010546447126575572, 0.16456490938645388, 0.16470786064254933, 0.1649889436511805, 0.19169578584074234, 0.19173578491378887, 0.36944986775394534, 0.38580963247963557, 0.3859700335462882, 0.3864413897972157], 'O2_g': [], 'C2H4_g': [0.0061269312179864565, 0.008776830958442164, 0.10167314836773261, 0.11858782777951922, 0.11884441854105972, 0.1302958217857919, 0.1520437141805729, 0.1633321843229625, 0.18152007445686696, 0.2071889246546463, 0.38496507044283546, 0.3870902007167171, 0.39438127195827005, 0.39748056432018886], 't': [], 'CO_t': [0.252927768, 0.03805075098, 0.03325256244, 0.03237227462000001, 0.012361224740000001, 0.00851771454], 'OH_t': [0.00438904068, 0.01572119656, 0.03817473518, 0.06345511356000001, 0.06620756280000001, 0.4538937577800001], 'H_t': [0.056970739900000004, 0.06980310460000001, 0.12340147426], 'OCCO_t': [0.019998651460000003, 0.021858414460000003, 0.025218386280000005, 0.03226068884, 0.040108888700000005, 0.041695886460000005, 0.0444483357, 0.06697626484000001, 0.08116005732, 0.1002412257, 0.17052786868000003, 0.19766801006], 'OCCO-H-ele_t': [0.024028137960000005, 0.02878913124, 0.030661292660000006, 0.039749334520000006, 0.04059242708, 0.042328205880000004, 0.045936146100000005, 0.06543886076, 0.08062692526, 0.102906886, 0.1340269202, 0.16360955032, 0.17297035742, 0.19785398636, 0.3168168262600001], 'OCCOH_t': [0.018461247380000004, 0.024350496880000003, 0.026507821960000004, 0.030190152700000004, 0.03275662564, 0.0392409993, 0.04018327922000001, 0.06359149618, 0.08454482598, 0.09613734868000001, 0.10923008020000001, 0.12769132758, 0.16026197692, 0.16716789686, 0.42350523036000004], 'CH2-CH2_t': [0.018845598400000003, 0.031925931500000004, 0.03792676678, 0.05161462246000001, 0.053908330160000004, 0.07975903586000001, 0.16488658758000002, 0.36549302318000004, 0.37294447360000005], 'OC-C_t': [0.0028268397600000003, 0.027784859220000003, 0.035955418, 0.048651400080000004, 0.054863008500000005, 0.06414942508, 0.23587994050000002], 'OC-CH_t': [0.014097003540000002, 0.030512511620000002, 0.03516191912, 0.040542833400000006, 0.045477404560000004, 0.05828497242000001, 0.07675861822, 0.11668153062000002, 0.2283169043, 0.36813388664], 'OCC_t': [0.030934057900000003, 0.03823672728, 0.03873266408, 0.07292750644000001, 0.07301429538000001, 0.15016966304, 0.26120991256000003], 'OCC-H-ele_t': [0.0005579289, 0.02007304198, 0.0315539789, 0.03461638864, 0.06392625352, 0.0670134601, 0.07047261928000001, 0.12841043594, 0.14508631084, 0.25721762132000003, 0.38658273560000006], 'OCCH_t': [], 'C_t': [0.0326698367, 0.07173725812000001, 0.07181164864000002], 'CH_t': [0.0469900118, 0.047113996000000005, 0.06237645102000001, 0.07430373106, 0.07431612948, 0.3800735651], 'CH2_t': [0.018845598400000003, 0.031925931500000004, 0.03792676678, 0.05161462246000001, 0.053908330160000004, 0.07975903586000001, 0.16488658758000002, 0.36549302318000004, 0.37294447360000005], 'CH3_t': [0.01187768636, 0.012832364700000001, 0.028020429200000002, 0.03456679496000001, 0.0676333811, 0.06789374792000001, 0.14460277246, 0.17362747368000003, 0.17404901996000002, 0.3650466800600001, 0.37377516774, 0.37398594088000003], 'CHOH_t': [0.4533854225600001, 0.36751396564, 0.17092461812, 0.14863225896, 0.12631510296, 0.08729727522000001, 0.04959368, 0.0406668176, 0.02680538404, 0.025900299380000002, 0.01887039524, 0.00784819986], 'CHO_t': [0.34307667982, 0.20576417832000002, 0.15135991136000002, 0.08236270406, 0.04915973530000001, 0.027450101880000004, 0.010960203280000002, 0.009075643440000001, 0.004537821720000001], 'COH_t': [0.4457603942600001, 0.15220300392, 0.13728770466, 0.05151543510000001, 0.04214222958, 0.038385508320000004, 0.02104011874, 0.01371265252, 0.010129509140000001], 'O2_t': [], 'C-CO_t': [0.01311752836, 0.019849870420000002, 0.03420724078, 0.06070266432000001, 0.06132258532000001, 0.24246350152], 'C-H-ele_t': [0.05654919362000001, 0.06267401310000001, 0.07029904140000001, 0.12497607360000001, 0.15164507502], 'C-H_t': [0.0326698367, 0.06320714516, 0.0665175233, 0.09791032274000001, 0.11715267058], 'CH-H-ele_t': [0.04338207158, 0.046791637080000004, 0.05206096558, 0.07814724126, 0.11891324622000002, 0.14120560538000002, 0.16179938100000002, 0.33092622822], 'CH-H_t': [0.0469900118, 0.047113996000000005, 0.06237645102000001, 0.07430373106, 0.07431612948, 0.3800735651], 'CH2-H-ele_t': [0.005765265300000001, 0.03819953202, 0.051986575060000005, 0.09122757436000001, 0.09943532840000001, 0.1350807859, 0.16042315638000001, 0.16720509212, 0.17485491726000002, 0.35455761674, 0.36466232904], 'CH2-H_t': [0.018845598400000003, 0.031925931500000004, 0.03792676678, 0.05161462246000001, 0.053908330160000004, 0.07975903586000001, 0.16488658758000002, 0.36549302318000004, 0.37294447360000005], 'CH3-H-ele_t': [0.01187768636, 0.012832364700000001, 0.028020429200000002, 0.03456679496000001, 0.0676333811, 0.06789374792000001, 0.14460277246, 0.17362747368000003, 0.17404901996000002, 0.3650466800600001, 0.37377516774, 0.37398594088000003], 'CH3-H_t': [0.018845598400000003, 0.031925931500000004, 0.03792676678, 0.05161462246000001, 0.053908330160000004, 0.07975903586000001, 0.16488658758000002, 0.36549302318000004, 0.37294447360000005], 'CHO-H-ele_t': [0.005132945880000001, 0.0207053614, 0.027834452900000004, 0.040332060260000004, 0.0497796563, 0.06636874226, 0.1410940196, 0.15716237192000002, 0.3510984575600001], 'CHOH-H-ele_t': [0.02308585804, 0.03381049134, 0.041423121220000005, 0.05099470146000001, 0.07165046918000001, 0.07861838122, 0.09453795250000001, 0.13795721934000002, 0.14878104, 0.1554141947, 0.19712247958000004, 0.22426262096000002, 0.37061357064, 0.41121839614], 'CO-H-ele_t': [0.0016737867000000003, 0.007984582480000002, 0.03141759628, 0.03951376454, 0.050263194680000005, 0.13548993376000001, 0.14607818444, 0.15985282906, 0.17605756400000003], 'COH-H-ele_t': [0.00778620776, 0.02835518654, 0.03872026566, 0.05657399046000001, 0.058012207180000004, 0.07638666562000002, 0.10923008020000001, 0.13251431296000002, 0.19605621546000002, 0.28407259904, 0.43461421468000005], 'COH-H_t': [0.4457603942600001, 0.15220300392, 0.13728770466, 0.05151543510000001, 0.04214222958, 0.038385508320000004, 0.02104011874, 0.01371265252, 0.010129509140000001], 'H-CO-ele_t': [0.252927768, 0.03805075098, 0.03325256244, 0.03237227462000001, 0.012361224740000001, 0.00851771454], 'H-CO_t': [0.02983059852, 0.037728392060000004, 0.059264447600000006, 0.16864330884000003, 0.23728096196], 'H-H_t': [0.01600636022, 0.027065750860000005, 0.05290405814, 0.50625228544], 'H-ele_t': [0.11190813892000001, 0.14945055468000001, 0.22129939858000003], 'H2-ele_t': [0.052147754520000006, 0.05525975794, 0.09911296948000001, 0.13376655338000001, 0.14198670584000003, 0.23754132878000003], '*_t': [], 'g': [], '*_g': []}
+
+frequency_surface_names = []
+
+frequency_unit_conversion = 0.0001239842
+
+gas_names = ('C2H4_g', 'CH4_g', 'CO_g', 'H2O_g', 'H2_g', 'H_g', 'O2_g', 'ele_g')
+
+gas_pressures = [0.138, 0.202, 1.0, 0.035, 0.3, 1.0, 1.0, 1.0]
+
+gas_thermo_mode = 'ideal_gas'
+
+hbond_dict = {'COOH': -0.25, 'OCHO': 0.0, 'CO': -0.1, 'CHO': -0.1, 'CH2O': 0.0, 'OCH3': 0.0, 'O': 0.0, 'OH': -0.5, 'H': 0.0, 'COH': -0.25, 'C': 0.0, 'CH': 0.0, 'CH2': 0.0, 'CH3': 0.0, 'CHOH': -0.25, 'COHOH': -0.25, 'OCH2O': 0.0, 'CH2OH': -0.25, 'OCHCH2': 0.0, 'OCHCHO': 0.0}
+
+hindered_ads_params = {}
+
+ideal_gas_params = {'H2_g': [2, 'linear', 0], 'N2_g': [2, 'linear', 0], 'O2_g': [2, 'linear', 1.0], 'H2O_g': [2, 'nonlinear', 0], 'CO_g': [1, 'linear', 0], 'CH4_g': [12, 'nonlinear', 0], 'NH3_g': [3, 'nonlinear', 0], 'CH3OH_g': [1, 'nonlinear', 0], 'CH3CH2OH_g': [1, 'nonlinear', 0], 'CO2_g': [2, 'linear', 0], 'CH2O_g': [2, 'nonlinear', 0], 'HCOOH_g': [1, 'nonlinear', 0], 'CH2CH2_g': [4, 'nonlinear', 0], 'CH3CHCH2_g': [1, 'nonlinear', 0], 'CH3CH2CHCH2_g': [1, 'nonlinear', 0], 'CH3CHCHCH3_g': [2, 'nonlinear', 0], 'CH3CH3CCH2_g': [2, 'nonlinear', 0], 'pe_g': [2, 'linear', 0], 'C2H2_g': [2, 'linear', 0], 'C2H4_g': [4, 'nonlinear', 0], 'C2H6_g': [6, 'nonlinear', 0], 'C3H6_g': [1, 'nonlinear', 0], 'CH3COOH_g': [1, 'nonlinear', 0], 'CH3CHO_g': [1, 'nonlinear', 0], 'C5H4O2_g': [1, 'nonlinear', 0], 'C5H6O2_g': [1, 'nonlinear', 0], 'C5H6O_g': [1, 'nonlinear', 0], 'HCl_g': [1, 'linear', 0], 'Cl2_g': [2, 'linear', 0]}
+
+input_file = 'input.txt'
+
+input_overrides_fit = True
+
+interaction_cross_term_names = ('CH2_t&H_t', 'CH2_t&H-ele_t', 'CH2_t&H2-ele_t', 'CH2_t&H-H_t', 'CH2_t&H-CO-ele_t', 'CH2_t&CHO_t', 'CH2_t&CO-H-ele_t', 'CH2_t&COH_t', 'CH2_t&COH-H-ele_t', 'CH2_t&C_t', 'C-H-ele_t&CH2_t', 'CH2_t&CH_t', 'CH2_t&CH2_t', 'CH-H-ele_t&CH2_t', 'CH2-H-ele_t&CH2_t', 'CH2_t&H-CO_t', 'CH2_t&OC-C_t', 'C-CO_t&CH2_t', 'CH2_t&OCC_t', 'CH2_t&OCC-H-ele_t', 'CH2_t&OCCH_t', 'CH2_t&OC-CH_t', 'CH2_t&OCCO_t', 'CH2_t&OCCO-H-ele_t', 'CH2_t&OCCOH_t', 'CH3_t&H_t', 'CH3_t&H-ele_t', 'CH3_t&H2-ele_t', 'CH3_t&H-H_t', 'CH3_t&H-CO-ele_t', 'CH3_t&CHO_t', 'CH3_t&CO-H-ele_t', 'CH3_t&COH_t', 'CH3_t&COH-H-ele_t', 'CH3_t&C_t', 'C-H-ele_t&CH3_t', 'CH3_t&CH_t', 'CH2_t&CH3_t', 'CH-H-ele_t&CH3_t', 'CH2-H-ele_t&CH3_t', 'CH3_t&H-CO_t', 'CH3_t&OC-C_t', 'C-CO_t&CH3_t', 'CH3_t&OCC_t', 'CH3_t&OCC-H-ele_t', 'CH3_t&OCCH_t', 'CH3_t&OC-CH_t', 'CH3_t&OCCO_t', 'CH3_t&OCCO-H-ele_t', 'CH3_t&OCCOH_t', 'CHOH_t&H_t', 'CHOH_t&H-ele_t', 'CHOH_t&H2-ele_t', 'CHOH_t&H-H_t', 'CHOH_t&H-CO-ele_t', 'CHOH_t&CHO_t', 'CHOH_t&CO-H-ele_t', 'CHOH_t&COH_t', 'CHOH_t&COH-H-ele_t', 'CHOH_t&C_t', 'C-H-ele_t&CHOH_t', 'CHOH_t&CH_t', 'CH2_t&CHOH_t', 'CH-H-ele_t&CHOH_t', 'CH2-H-ele_t&CHOH_t', 'CHOH_t&H-CO_t', 'CHOH_t&OC-C_t', 'C-CO_t&CHOH_t', 'CHOH_t&OCC_t', 'CHOH_t&OCC-H-ele_t', 'CHOH_t&OCCH_t', 'CHOH_t&OC-CH_t', 'CHOH_t&OCCO_t', 'CHOH_t&OCCO-H-ele_t', 'CHOH_t&OCCOH_t', 'CHO_t&H_t', 'CHO_t&H-ele_t', 'CHO_t&H2-ele_t', 'CHO_t&H-H_t', 'CHO_t&H-CO-ele_t', 'CHO_t&CHO_t', 'CHO_t&CO-H-ele_t', 'CHO_t&COH_t', 'CHO_t&COH-H-ele_t', 'CHO_t&C_t', 'C-H-ele_t&CHO_t', 'CHO_t&CH_t', 'CH-H-ele_t&CHO_t', 'CH2-H-ele_t&CHO_t', 'CHO_t&H-CO_t', 'CHO_t&OC-C_t', 'C-CO_t&CHO_t', 'CHO_t&OCC_t', 'CHO_t&OCC-H-ele_t', 'CHO_t&OCCH_t', 'CHO_t&OC-CH_t', 'CHO_t&OCCO_t', 'CHO_t&OCCO-H-ele_t', 'CHO_t&OCCOH_t', 'CH_t&H_t', 'CH_t&H-ele_t', 'CH_t&H2-ele_t', 'CH_t&H-H_t', 'CH_t&H-CO-ele_t', 'CH_t&CO-H-ele_t', 'CH_t&COH_t', 'CH_t&COH-H-ele_t', 'CH_t&C_t', 'C-H-ele_t&CH_t', 'CH_t&CH_t', 'CH-H-ele_t&CH_t', 'CH2-H-ele_t&CH_t', 'CH_t&H-CO_t', 'CH_t&OC-C_t', 'C-CO_t&CH_t', 'CH_t&OCC_t', 'CH_t&OCC-H-ele_t', 'CH_t&OCCH_t', 'CH_t&OC-CH_t', 'CH_t&OCCO_t', 'CH_t&OCCO-H-ele_t', 'CH_t&OCCOH_t', 'COH_t&H_t', 'COH_t&H-ele_t', 'COH_t&H2-ele_t', 'COH_t&H-H_t', 'COH_t&H-CO-ele_t', 'CO-H-ele_t&COH_t', 'COH_t&COH_t', 'COH-H-ele_t&COH_t', 'COH_t&C_t', 'C-H-ele_t&COH_t', 'CH-H-ele_t&COH_t', 'CH2-H-ele_t&COH_t', 'COH_t&H-CO_t', 'COH_t&OC-C_t', 'C-CO_t&COH_t', 'COH_t&OCC_t', 'COH_t&OCC-H-ele_t', 'COH_t&OCCH_t', 'COH_t&OC-CH_t', 'COH_t&OCCO_t', 'COH_t&OCCO-H-ele_t', 'COH_t&OCCOH_t', 'CO_t&H_t', 'CO_t&H-ele_t', 'CO_t&H2-ele_t', 'CO_t&H-H_t', 'CO_t&H-CO-ele_t', 'CHO_t&CO_t', 'CO-H-ele_t&CO_t', 'COH_t&CO_t', 'COH-H-ele_t&CO_t', 'CO_t&C_t', 'C-H-ele_t&CO_t', 'CH_t&CO_t', 'CH2_t&CO_t', 'CH-H-ele_t&CO_t', 'CH2-H-ele_t&CO_t', 'CO_t&H-CO_t', 'CO_t&OC-C_t', 'C-CO_t&CO_t', 'CO_t&OCC_t', 'CO_t&OCC-H-ele_t', 'CO_t&OCCH_t', 'CO_t&OC-CH_t', 'CO_t&OCCO_t', 'CO_t&OCCO-H-ele_t', 'CO_t&OCCOH_t', 'C_t&H_t', 'C_t&H-ele_t', 'C_t&H2-ele_t', 'C_t&H-H_t', 'C_t&H-CO-ele_t', 'CO-H-ele_t&C_t', 'COH-H-ele_t&C_t', 'C_t&C_t', 'C-H-ele_t&C_t', 'CH-H-ele_t&C_t', 'CH2-H-ele_t&C_t', 'C_t&H-CO_t', 'C_t&OC-C_t', 'C-CO_t&C_t', 'C_t&OCC_t', 'C_t&OCC-H-ele_t', 'C_t&OCCH_t', 'C_t&OC-CH_t', 'C_t&OCCO_t', 'C_t&OCCO-H-ele_t', 'C_t&OCCOH_t', 'H-ele_t&H_t', 'H2-ele_t&H_t', 'H-H_t&H_t', 'H-CO-ele_t&H_t', 'CO-H-ele_t&H_t', 'COH-H-ele_t&H_t', 'C-H-ele_t&H_t', 'CH-H-ele_t&H_t', 'CH2-H-ele_t&H_t', 'H-CO_t&H_t', 'H_t&OC-C_t', 'C-CO_t&H_t', 'H_t&OCC_t', 'H_t&OCC-H-ele_t', 'H_t&OCCH_t', 'H_t&OC-CH_t', 'H_t&OCCO_t', 'H_t&OCCO-H-ele_t', 'H_t&OCCOH_t', 'H-ele_t&OCCH_t', 'H2-ele_t&OCCH_t', 'H-H_t&OCCH_t', 'H-CO-ele_t&OCCH_t', 'CO-H-ele_t&OCCH_t', 'COH-H-ele_t&OCCH_t', 'C-H-ele_t&OCCH_t', 'CH-H-ele_t&OCCH_t', 'CH2-H-ele_t&OCCH_t', 'H-CO_t&OCCH_t', 'OC-C_t&OCCH_t', 'C-CO_t&OCCH_t', 'OCCH_t&OCC_t', 'OCC-H-ele_t&OCCH_t', 'OCCH_t&OCCH_t', 'OC-CH_t&OCCH_t', 'OCCH_t&OCCO_t', 'OCCH_t&OCCO-H-ele_t', 'OCCH_t&OCCOH_t', 'H-ele_t&OCCOH_t', 'H2-ele_t&OCCOH_t', 'H-H_t&OCCOH_t', 'H-ele_t&OCCO_t', 'H2-ele_t&OCCO_t', 'H-H_t&OCCO_t', 'H-ele_t&OCC_t', 'H2-ele_t&OCC_t', 'H-H_t&OCC_t', 'H-CO-ele_t&OCC_t', 'CO-H-ele_t&OCC_t', 'COH-H-ele_t&OCC_t', 'C-H-ele_t&OCC_t', 'CH-H-ele_t&OCC_t', 'CH2-H-ele_t&OCC_t', 'H-CO_t&OCC_t', 'OC-C_t&OCC_t', 'C-CO_t&OCC_t', 'OCC_t&OCC_t', 'OCC-H-ele_t&OCC_t', 'OC-CH_t&OCC_t', 'OCCO_t&OCC_t', 'OCCO-H-ele_t&OCC_t', 'OCCOH_t&OCC_t')
+
+interaction_fitting_mode = None
+
+interaction_parameters = [2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 0, 0, 2.467, 2.9604, 2.9604, 2.467, 1.033, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 2.467, 1.85025, 1.2335, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 2.467, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.0, 0.0, 0.0, 0.7274, 0.7274, 0.7274, 0.7274, 0.3637, 0.3637, 0.7274, 0.7274, 0.7274, 0.3637, 0.3637, 0.21822, 0.7274, 0.87288, 0.3637, 0.3637, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 0.7401, 2.467, 2.9604, 1.2335, 1.2335, 0.7855920000000001, 0.28368600000000005, 1.1565660000000002, 0.7855920000000001, 0.28368600000000005, 1.1565660000000002, 0.7855920000000001, 0.50918, 1.1565660000000002, 2.467, 2.467, 2.467, 2.467, 1.2335, 1.2335, 2.467, 2.467, 2.467, 1.2335, 1.2335, 2.467, 2.9604, 1.2335, 1.2335]
+
+interaction_response_parameters = {'slope': 1, 'cutoff': 0.25, 'smoothing': 0.05}
+
+interaction_scaling_constraint_dict = {'CO_t': [0, 0, None], 'H_t': [0, 0, None], 'OH_t': [0, 0, None], 'COH_t': [0, 0, None], 'CHO_t': [0, 0, None], 'C_t': [0, 0, None], 'CH_t': [0, 0, None], 'CH2_t': [0, 0, None], 'CH3_t': [0, 0, None]}
+
+interaction_strength = 1
+
+interaction_surface_names = None
+
+interaction_transition_state_scaling_matrix = [[0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0.5, 0], [0, 0, 0, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0.5, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0], [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0.5, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0.5, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0.5, 0, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0.5, 0, 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0.5, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1.0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0.5, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0, 0.5, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0.5, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0.5, 0, 0]]
+
+internally_constrain_coverages = True
+
+kBT = mpf('0.025851997434000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003')
+
+max_bisections = 5
+
+max_initial_guesses = 3
+
+max_rootfinding_iterations = 200
+
+model_name = 'COR_template'
+
+numAfterPt = 0
+
+numBeforePt = 0
+
+numerical_delta_theta = None
+
+numerical_representation = 'mpmath'
+
+optimize_analytical_expressions = False
+
+output_labels = {'coverage': ('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t'), 'rate': ([['H_g', 'ele_g', 't'], ['H-ele_t'], ['H_t']], [['H_g', 'ele_g', 'H_t'], ['H2-ele_t'], ['H2_g', 't']], [['H_t', 'H_t'], ['H-H_t', 't'], ['H2_g', 't', 't']], [['OH_t', 'H_g', 'ele_g'], ['H2O_g', 't']], [['CO_g', 't'], ['CO_t']], [['CHO_t', 'H_g', 'ele_g'], ['CHO-H-ele_t'], ['CHOH_t']], [['CHOH_t', 'H_g', 'ele_g'], ['CHOH-H-ele_t'], ['CH_t', 'H2O_g']], [['CH_t', 'H_g', 'ele_g'], ['CH-H-ele_t'], ['CH2_t']], [['CH2_t', 'H_g', 'ele_g'], ['CH2-H-ele_t'], ['CH3_t']], [['CH3_t', 'H_g', 'ele_g'], ['CH3-H-ele_t'], ['CH4_g', 't']], [['CO_t', 'H_g', 'ele_g'], ['CO-H-ele_t'], ['COH_t']], [['COH_t', 'H_g', 'ele_g'], ['COH-H-ele_t'], ['C_t', 'H2O_g']], [['C_t', 'H_g', 'ele_g'], ['C-H-ele_t'], ['CH_t']], [['CO_t', 'H_t'], ['H-CO_t', 't'], ['CHO_t', 't']], [['COH_t', 'H_t'], ['COH-H_t', 't'], ['CHOH_t', 't']], [['C_t', 'H_t'], ['C-H_t', 't'], ['CH_t', 't']], [['CH_t', 'H_t'], ['CH-H_t', 't'], ['CH2_t', 't']], [['CH2_t', 'H_t'], ['CH2-H_t', 't'], ['CH3_t', 't']], [['CH3_t', 'H_t'], ['CH3-H_t', 't'], ['CH4_g', 't', 't']], [['O2_g', 't'], ['O2_t']], [['CO_t', 'C_t'], ['OC-C_t'], ['OCC_t', 't']], [['CO_g', 'C_t'], ['C-CO_t'], ['OCC_t']], [['OCC_t', 'H_g', 'ele_g'], ['OCC-H-ele_t'], ['OCCH_t']], [['OCCH_t', 'H_g', 'H_g', 'H_g', 'H_g', 'H_g', 'ele_g', 'ele_g', 'ele_g', 'ele_g', 'ele_g'], ['C2H4_g', 'H2O_g', 't']], [['CH2_t', 'CH2_t'], ['CH2-CH2_t'], ['C2H4_g', 't', 't']], [['CO_t', 'CO_t'], ['OCCO_t']], [['OCCO_t', 'H_g', 'ele_g'], ['OCCO-H-ele_t'], ['OCCOH_t']], [['OCCOH_t', 'H_g', 'ele_g'], ['OCC_t', 'H2O_g', 't']], [['CO_t', 'CH_t'], ['OC-CH_t'], ['OCCH_t', 't']], [['CO_t', 'H_g', 'ele_g'], ['H-CO-ele_t'], ['CHO_t']]), 'selectivity': ('C2H4_g', 'CH4_g', 'CO_g', 'H2O_g', 'H2_g', 'H_g', 'O2_g', 'ele_g'), 'interacting_energy': ('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t', 'C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t'), 'production_rate': ('C2H4_g', 'CH4_g', 'CO_g', 'H2O_g', 'H2_g', 'H_g', 'O2_g', 'ele_g'), 'free_energy': ('C2H4_g', 'CH4_g', 'CO_g', 'H2O_g', 'H2_g', 'H_g', 'O2_g', 'ele_g', 'CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t', 'C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t'), 'interaction_matrix': [('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t', 'C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t'), ('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t', 'C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t')]}
+
+output_variables = ['coverage', 'rate', 'production_rate', 'free_energy', 'selectivity', 'interacting_energy', 'interaction_matrix']
+
+pH = 0
+
+parameter_mode = 'formation_energy'
+
+parameter_names = ('CH2_t', 'CH3_t', 'CHOH_t', 'CHO_t', 'CH_t', 'COH_t', 'CO_t', 'C_t', 'H_t', 'O2_t', 'OCCH_t', 'OCCOH_t', 'OCCO_t', 'OCC_t', 'OH_t', 'C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t')
+
+parse_headers = ['formation_energy', 'frequencies']
+
+perturbation_size = 1e-14
+
+prefactor_list = ['10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0', '10000000000000.0']
+
+pressure = 1.0
+
+pressure_mode = 'static'
+
+products = ['C2H4_g', 'CH4_g', 'H2O_g', 'H2_g', 'O2_g']
+
+reactants = ['CO_g', 'H_g', 'ele_g']
+
+recalculate = True
+
+required_headers = ['species_name', 'surface_name', 'site_name', 'formation_energy', 'frequencies', 'reference']
+
+residual_threshold = 0.9
+
+resolution = [27, 1]
+
+rxn_expressions = ['H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65', 'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65', 'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t', 'OH*_t + H_g + ele_g <-> H2O_g + *_t', 'CO_g + *_t <-> CO*_t', 'CHO*_t + H_g + ele_g <-> CHO-H-ele*_t <-> CHOH*_t; beta=0.5', 'CHOH*_t + H_g + ele_g <-> CHOH-H-ele*_t <-> CH*_t + H2O_g; beta=0.5', 'CH*_t + H_g + ele_g <-> CH-H-ele*_t <-> CH2*_t; beta=0.5', 'CH2*_t + H_g + ele_g <-> CH2-H-ele*_t <-> CH3*_t; beta=0.5', 'CH3*_t + H_g + ele_g <-> CH3-H-ele*_t <-> CH4_g + *_t; beta=0.5', 'CO*_t + H_g + ele_g <-> CO-H-ele*_t <-> COH*_t; beta=0.5', 'COH*_t + H_g + ele_g <-> COH-H-ele*_t <-> C*_t + H2O_g; beta = 0.45', 'C*_t + H_g + ele_g <-> C-H-ele*_t <-> CH*_t; beta=0.6', 'CO*_t + H*_t <-> H-CO*_t + *_t <-> CHO*_t + *_t', 'COH*_t + H*_t <-> COH-H*_t + *_t <-> CHOH*_t + *_t', 'C*_t + H*_t <-> C-H*_t + *_t <-> CH*_t + *_t', 'CH*_t + H*_t <-> CH-H*_t + *_t <-> CH2*_t + *_t', 'CH2*_t + H*_t <-> CH2-H*_t + *_t <-> CH3*_t + *_t', 'CH3*_t + H*_t <-> CH3-H*_t + *_t <-> CH4_g + 2*_t', 'O2_g + *_t -> O2*_t', 'CO*_t + C*_t <-> OC-C*_t <-> OCC*_t + *_t', 'CO_g + C*_t <-> C-CO*_t <-> OCC*_t', 'OCC*_t + H_g + ele_g <-> OCC-H-ele_t <-> OCCH_t; beta=0.5', 'OCCH*_t + 5H_g + 5ele_g <-> C2H4_g + H2O_g + *_t', '2CH2*_t <-> CH2-CH2*_t <-> C2H4_g + 2*_t', '2CO_t <-> OCCO_t', 'OCCO_t + H_g + ele_g <-> OCCO-H-ele_t <-> OCCOH_t; beta=0.5', 'OCCOH_t + H_g + ele_g <-> OCC_t + H2O_g + *_t', 'CO_t + CH_t <-> OC-CH_t <-> OCCH_t + *_t', 'CO*_t + H_g + ele_g <-> H-CO-ele*_t <-> CHO*_t; beta=0.5']
+
+rxn_mechanisms = {'C1_via_CO-H-ele': [5, 11, 12, 13, 8, 9, 10], 'C1_via_H-CO': [5, 1, 14, 6, 7, 8, 9, 10], 'C2_via_OCCOH': [5, 5, 26, 27, 28, 23, 24], 'C2_via_C-CO': [5, 11, 12, 22, 23, 24], 'C2_via_CH-CO': [5, 11, 12, 13, 5, 29, 24], 'C2_via_CH2-CH2': [5, 11, 12, 13, 8, 5, 11, 12, 13, 8, 25], 'HER_Heyrovsky': [5, 1, 2]}
+
+rxn_options_dict = {'prefactor': {}, 'beta': {0: '0.65', 1: '0.65', 5: '0.5', 6: '0.5', 7: '0.5', 8: '0.5', 9: '0.5', 10: '0.5', 11: '0.45', 12: '0.6', 22: '0.5', 26: '0.5', 29: '0.5'}}
+
+scaling_constraint_dict = {'C_t': ['+', 0.0, None], 'CH_t': ['+', 0.0, None], 'CH2_t': ['+', 0.0, None], 'CH3_t': ['+', 0.0, None], 'OH_t': ['+', 0.0, None], 'CHOH_t': ['+', 0.0, None], 'COH_t': ['+', 0.0, None], 'CHO_t': ['+', 0.0, None], 'H_t': ['+', 0.0, None], 'H-H_t': 'initial_state', 'H-ele_t': 'final_state', 'H2-ele_t': 'initial_state', 'H-CO_t': 'initial_state'}
+
+search_directions = [[0, 0], [0, 1], [1, 0], [0, -1], [-1, 0], [-1, 1], [1, 1], [1, -1], [-1, -1]]
+
+setup_file = 'COR_template.mkm'
+
+shomate_params = {'H2_g:298-1000': [33.066178, -11.363417, 11.432816, -2.772874, -0.158558, -9.980797, 172.707974, 0], 'H2_g:1000-2500': [18.563083, 12.257357, -2.859786, 0.268238, 1.97799, -1.147438, 156.288133, 0], 'H2_g:2500-6000': [43.41356, -4.293079, 1.272428, -0.096876, -20.533862, -38.515158, 162.081354, 0], 'CH4_g:298-1300': [-0.703029, 108.4773, -42.52157, 5.862788, 0.678565, -76.84376, 158.7163, -74.8731], 'CH4_g:1300-1600': [85.81217, 11.26467, -2.114146, 0.13819, -26.42221, -153.5327, 224.4143, -74.8731], 'CO_g:298-1300': [25.56759, 6.09613, 4.054656, -2.671201, 0.131021, -118.0089, 227.3665, -110.5271], 'CO_g:1300-1600': [35.1507, 1.300095, -0.205921, 0.01355, -3.28278, -127.8375, 231.712, -110.5271], 'H2O_g:100-500': [36.303952, -24.11232, 63.64111, -38.9524, -0.01385, -10.23966, 237.39431, 0.0], 'H2O_g:500-1700': [30.092, 6.832514, 6.793435, -2.53448, 0.082139, -250.881, 223.3967, -241.8264], 'H2O_g:1700-6000': [41.96426, 8.622053, -1.49978, 0.098119, -11.15764, -272.1797, 219.7809, -241.8264], 'CO2_g:298-1200': [24.99735, 55.18696, -33.69137, 7.948387, -0.136638, -403.6075, 228.2431, -393.5224], 'CO2_g:1200-6000': [58.16639, 2.720075, -0.492289, 0.038844, -6.447293, -425.9186, 263.6125, -393.5224], 'O2_g:100-700': [31.32234, -20.23531, 57.8664, -36.50624, -0.007374, -8.903471, 246.7945, 0.0], 'O2_g:700-2000': [30.03235, 8.772972, -3.988133, 0.788313, -0.741599, -11.32468, 236.1663, 0.0], 'O2_g:2000-6000': [20.91111, 10.72071, -2.020498, 0.146449, 9.245722, 5.337651, 237.6185, 0.0], 'NH3_g:298-1400': [19.99563, 49.77119, -15.37599, 1.921168, 0.189174, -53.30667, 203.8591, -45.89806], 'N2_g:100-500': [28.98641, 1.853978, -9.647459, 16.63537, 0.000117, -8.671914, 226.4168, 0.0], 'N2_g:500-2000': [19.50583, 19.88705, -8.598535, 1.369784, 0.527601, -4.935202, 212.39, 0.0], 'N2O_g:298-1400': [27.67988, 51.14898, -30.64454, 6.847911, -0.157906, 71.24934, 238.6164, 82.04824], 'NO2_g:298-1200': [16.10857, 75.89525, -54.3874, 14.30777, 0.239423, 26.17464, 240.5386, 33.09502], 'NO_g:298-1200': [23.83491, 12.58878, -1.139011, -1.497459, 0.214194, 83.35783, 237.1219, 90.29114], 'NO3_g:298-1200': [11.22316, 166.3889, -148.4458, 47.40598, -0.176791, 61.00858, 221.7679, 71.128], 'HNO2_g:298-1200': [24.89974, 91.37563, -64.84614, 17.92007, -0.134737, -88.13596, 254.2671, -76.73498], 'HNO3_g:298-1200': [19.63229, 153.9599, -115.8378, 32.87955, -0.249114, -146.8818, 247.7049, -134.306], 'HCN_g:298-1200': [32.69373, 22.59205, -4.369142, -0.407697, -0.282399, 123.4811, 233.2597, 135.1432], 'CH2CH2_g:298-1200': [-6.38788, 184.4019, -112.9718, 28.49593, 0.31554, 48.17332, 163.1568, 52.46694], 'CH2O_g:298-1500': [5.193767, 93.23249, -44.85457, 7.882279, 0.551175, -119.3591, 202.4663, -115.8972], 'CH3OH_g:298-1500': [-1.0845814245433651, 153.2463565199489, -79.53050359618254, 16.47130239316011, 0.5220334601533215, -4.897417024069, 199.1893745506112, 0.0], 'C5H4O2_g:100-1500': [-16.36694, 0.46958, -0.000331925, 8.50912e-08, 198590.9145, -1661.34999, -15.68938, 12461.34999], 'C5H6O2_g:100-1500': [-18.57626, 0.50733, -0.000335824, 8.28263e-08, 231619.2141, -6357.53523, 2.75692, 7057.53523], 'C5H6O_g:50-1500': [1.26847, 0.35388, -0.000173962, 2.87427e-08, 48401.71207, -5691.94893, -85.38991, 7191.94893], 'Cl2_g:298-1000': [33.0506, 12.2294, -12.0651, 4.38533, -0.159494, -10.8348, 259.029, 0.0], 'HCl_g:298-1200': [32.12392, -13.45805, 19.86852, -6.853936, -0.049672, -101.6206, 228.6866, -92.31201], 'CH3CH2OH_g:298-1500': [-4.7367880805894265, 271.96181550301463, -169.34946529216657, 43.73860153608533, 0.24643430702178773, -9.828280829187861, 203.3325622617075, 0.0], 'CH3CHO_g:298-1500': [4.8037386340099095, 185.92002366990326, -99.1084610902012, 20.61473919069016, 0.2770802548558646, -8.566600040790945, 220.00244674443837, 0.0], 'HCOOH_g:298-1500': [3.802752304225226, 153.66217894746168, -84.64046773816926, 16.297377707561505, 0.2772064997263338, -6.16527, 212.9698972559699, 0]}
+
+site_names = ('t', 'g')
+
+species = 'COH_t'
+
+standard_coadsorbate_coverage = 'min'
+
+standard_coverage = 'min'
+
+surface_names = ('Cu',)
+
+temperature = 300.0
+
+thermodynamic_corrections = ['gas', 'adsorbate', 'electrochemical']
+
+thermodynamic_variables = ['temperature', 'gas_pressures', 'voltage', 'beta', 'pH', 'Upzc', 'gas_thermo_mode', 'adsorbate_thermo_mode']
+
+tolerance = 1e-35
+
+transition_state_cross_interaction_mode = 'intermediate_state'
+
+transition_state_names = ('C-CO_t', 'C-H-ele_t', 'C-H_t', 'CH-H-ele_t', 'CH-H_t', 'CH2-CH2_t', 'CH2-H-ele_t', 'CH2-H_t', 'CH3-H-ele_t', 'CH3-H_t', 'CHO-H-ele_t', 'CHOH-H-ele_t', 'CO-H-ele_t', 'COH-H-ele_t', 'COH-H_t', 'H-CO-ele_t', 'H-CO_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'OC-CH_t', 'OC-C_t', 'OCC-H-ele_t', 'OCCO-H-ele_t')
+
+verbose = 1
+
+voltage = 0.0
+
+stdout = """mapper_iteration_0: status - 27 points do not have valid solution.
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 1396.540068651228)
+minresid_iteration_0: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 10000000000000.0 (residual = 1396.540068651228)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 478681163197.30695)
+minresid_iteration_1: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 1255326293644.0024 (residual = 478681163197.30695)
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 69215370144.80646)
+minresid_iteration_2: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 1255748999383.5654 (residual = 69215370144.80646)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 1399.8478606181436)
+minresid_iteration_0: fail - [-0.05,300.00] using coverages from [-0.05,300.00]; initial residual was 9999995819204.896 (residual = 1399.8478606181436)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 1414.1044897734346)
+minresid_iteration_0: fail - [-0.11,300.00] using coverages from [-0.11,300.00]; initial residual was 9999995819204.896 (residual = 1414.1044897734346)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 1456.1394902918769)
+minresid_iteration_0: fail - [-0.16,300.00] using coverages from [-0.16,300.00]; initial residual was 9999995819204.896 (residual = 1456.1394902918769)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 1590.24914963285)
+minresid_iteration_0: fail - [-0.22,300.00] using coverages from [-0.22,300.00]; initial residual was 9999995819204.896 (residual = 1590.24914963285)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 2154.606381431681)
+minresid_iteration_0: fail - [-0.27,300.00] using coverages from [-0.27,300.00]; initial residual was 9999995819204.896 (residual = 2154.606381431681)
+minresid_iteration_0: success - [-0.32,300.00] using coverages from [-0.32,300.00]
+minresid_iteration_0: success - [-0.38,300.00] using coverages from [-0.38,300.00]
+minresid_iteration_0: success - [-0.43,300.00] using coverages from [-0.43,300.00]
+minresid_iteration_0: success - [-0.48,300.00] using coverages from [-0.48,300.00]
+minresid_iteration_0: success - [-0.54,300.00] using coverages from [-0.54,300.00]
+minresid_iteration_0: success - [-0.59,300.00] using coverages from [-0.59,300.00]
+minresid_iteration_0: success - [-0.65,300.00] using coverages from [-0.65,300.00]
+minresid_iteration_0: success - [-0.70,300.00] using coverages from [-0.70,300.00]
+minresid_iteration_0: success - [-0.75,300.00] using coverages from [-0.75,300.00]
+minresid_iteration_0: success - [-0.81,300.00] using coverages from [-0.81,300.00]
+minresid_iteration_0: success - [-0.86,300.00] using coverages from [-0.86,300.00]
+minresid_iteration_0: success - [-0.92,300.00] using coverages from [-0.92,300.00]
+rootfinding_iteration_6: fail - stagnated or diverging (residual = 92116416538.28102)
+minresid_iteration_0: fail - [-0.97,300.00] using coverages from [-0.97,300.00]; initial residual was 9999995819203.602 (residual = 92116416538.28102)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 2633.1693465287485)
+minresid_iteration_1: fail - [-0.97,300.00] using coverages from [-0.92,300.00]; initial residual was 4787.831893748239 (residual = 2633.1693465287485)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 2633.1693465287485)
+bisection_iteration_1: fail - move from [-0.92,300.00] to [-0.97,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 1102.3263891690565)
+bisection_iteration_2: fail - move from [-0.92,300.00] to [-0.94,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 521.0583786726922)
+bisection_iteration_3: fail - move from [-0.92,300.00] to [-0.93,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 254.86862116124956)
+bisection_iteration_4: fail - move from [-0.92,300.00] to [-0.92,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 126.08694023108684)
+bisection_iteration_5: fail - move from [-0.92,300.00] to [-0.92,300.00]
+minresid_iteration_0: fail - [-0.92,300.00] using coverages from [-0.92,300.00]; initial residual was 2633.1693465287485 (residual = 211.3801177849607)
+minresid_iteration_0: success - [-1.02,300.00] using coverages from [-1.02,300.00]
+minresid_iteration_0: success - [-1.08,300.00] using coverages from [-1.08,300.00]
+minresid_iteration_0: success - [-1.13,300.00] using coverages from [-1.13,300.00]
+minresid_iteration_0: success - [-1.18,300.00] using coverages from [-1.18,300.00]
+minresid_iteration_0: success - [-1.24,300.00] using coverages from [-1.24,300.00]
+rootfinding_iteration_6: fail - stagnated or diverging (residual = 224608636595.06677)
+minresid_iteration_0: fail - [-1.29,300.00] using coverages from [-1.29,300.00]; initial residual was 9999995818534.895 (residual = 224608636595.06677)
+minresid_iteration_1: success - [-1.29,300.00] using coverages from [-1.24,300.00]
+minresid_iteration_0: success - [-1.35,300.00] using coverages from [-1.35,300.00]
+minresid_iteration_0: success - [-1.40,300.00] using coverages from [-1.40,300.00]
+mapper_iteration_1: status - 7 points do not have valid solution.
+minresid_iteration_0: success - [-0.27,300.00] using coverages from [-0.32,300.00]
+rootfinding_iteration_1: cancel - stationary point or singular jacobian (residual = 11579.012665920802)
+minresid_iteration_0: fail - [-0.97,300.00] using coverages from [-1.02,300.00]; initial residual was 11579.012665920802 (residual = 11579.012665920802)
+rootfinding_iteration_1: cancel - stationary point or singular jacobian (residual = 11579.012665920802)
+bisection_iteration_1: fail - move from [-1.02,300.00] to [-0.97,300.00]
+rootfinding_iteration_1: cancel - stationary point or singular jacobian (residual = 7163.334537220592)
+bisection_iteration_2: fail - move from [-1.02,300.00] to [-1.00,300.00]
+rootfinding_iteration_1: cancel - stationary point or singular jacobian (residual = 4026.294979014628)
+bisection_iteration_3: fail - move from [-1.02,300.00] to [-1.01,300.00]
+rootfinding_iteration_1: cancel - stationary point or singular jacobian (residual = 2139.841831472982)
+bisection_iteration_4: fail - move from [-1.02,300.00] to [-1.02,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 1102.4893597469495)
+bisection_iteration_5: fail - move from [-1.02,300.00] to [-1.02,300.00]
+minresid_iteration_0: fail - [-1.02,300.00] using coverages from [-1.02,300.00]; initial residual was 11579.012665920802 (residual = 1103.756510987974)
+mapper_iteration_2: status - 6 points do not have valid solution.
+minresid_iteration_0: success - [-0.22,300.00] using coverages from [-0.27,300.00]
+mapper_iteration_3: status - 5 points do not have valid solution.
+minresid_iteration_0: success - [-0.16,300.00] using coverages from [-0.22,300.00]
+mapper_iteration_4: status - 4 points do not have valid solution.
+minresid_iteration_0: success - [-0.11,300.00] using coverages from [-0.16,300.00]
+mapper_iteration_5: status - 3 points do not have valid solution.
+minresid_iteration_0: success - [-0.05,300.00] using coverages from [-0.11,300.00]
+mapper_iteration_6: status - 2 points do not have valid solution.
+minresid_iteration_0: success - [ 0.00,300.00] using coverages from [-0.05,300.00]
+mapper_iteration_7: status - 1 points do not have valid solution.
+mapper_iteration_8: fail - no solution at 1 points.
+header_evaluation: fail - could not save atoms_dict = {'C2H4_g': Atoms(symbols='C2H4', pbc=False), 'CH4_g': Atoms(symbols='CH4', pbc=False), 'CO_g': Atoms(symbols='OC', pbc=False), 'H2O_g': Atoms(symbols='OH2', pbc=False), 'H2_g': Atoms(symbols='H2', pbc=False), 'H_g': Atoms(symbols='H', pbc=False, initial_magmoms=...), 'O2_g': Atoms(symbols='O2', pbc=False, initial_magmoms=...)}
+
+"""

@@ -1,0 +1,428 @@
+from numpy import array
+
+try:
+    import cPickle as pickle
+
+except: #workaround for python3.X
+    import _pickle as pickle
+
+
+from mpmath import mpf 
+
+parser = None
+
+scaler = 'ThermodynamicScaler'
+
+thermodynamics = 'ThermoCorrections'
+
+solver = 'SteadyStateSolver'
+
+mapper = 'MinResidMapper'
+
+binary_data = pickle.load(open("CO2R_pH7.pkl","rb"))
+
+locals().update(binary_data)
+
+A_uc = None
+
+adsorbate_interaction_model = 'first_order'
+
+adsorbate_names = ('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t')
+
+adsorbate_thermo_mode = 'harmonic_adsorbate'
+
+analytical_jacobian = True
+
+atomic_reservoir_dict = {'O': 'H2O_g', 'C': 'HCOOH_g', 'H': 'H_g'}
+
+atomic_reservoir_list = [{'O': 'CO2_g', 'C': 'CO_g', 'H': 'H2O_g'}, {'O': 'CO2_g', 'C': 'CO_g', 'H': 'H2_g'}, {'O': 'CO2_g', 'C': 'CO_g', 'H': 'HCOOH_g'}, {'O': 'CO2_g', 'C': 'CO_g', 'H': 'H_g'}, {'O': 'CO2_g', 'C': 'HCOOH_g', 'H': 'H2O_g'}, {'O': 'CO_g', 'C': 'HCOOH_g', 'H': 'H2_g'}, {'O': 'CO_g', 'C': 'HCOOH_g', 'H': 'H_g'}, {'O': 'H2O_g', 'C': 'CO2_g', 'H': 'H2_g'}, {'O': 'H2O_g', 'C': 'CO2_g', 'H': 'H_g'}, {'O': 'H2O_g', 'C': 'CO_g', 'H': 'H2_g'}, {'O': 'H2O_g', 'C': 'CO_g', 'H': 'H_g'}, {'O': 'H2O_g', 'C': 'HCOOH_g', 'H': 'H2_g'}, {'O': 'H2O_g', 'C': 'HCOOH_g', 'H': 'H_g'}]
+
+beta = 0.5
+
+coverage_headers = ['coverage', 'coadsorbate_coverage']
+
+cross_interaction_mode = 'geometric_mean'
+
+data_file = 'CO2R_pH7.pkl'
+
+decimal_precision = 100
+
+default_self_interaction_parameter = 0
+
+descriptor_decimal_precision = 2
+
+descriptor_names = ('voltage', 'temperature')
+
+descriptor_ranges = [[-1.4, 0.0], [300, 300]]
+
+eCO = 2.467
+
+eH = 0.0
+
+eHCO = 0.7274
+
+echem_transition_state_names = ['echemTS-6-0.60_t']
+
+electrochemical_thermo_mode = 'simple_electrochemical'
+
+elementary_rxns = ([['H_g', 'ele_g', 't'], ['H-ele_t'], ['H_t']], [['H_g', 'ele_g', 'H_t'], ['H2-ele_t'], ['H2_g', 't']], [['H_t', 'H_t'], ['H-H_t', 't'], ['H2_g', 't', 't']], [['OH_t', 'H_g', 'ele_g'], ['H2O_g', 't']], [['CO2_g', 'H_g', 'ele_g', 't', 't'], ['CO2-H-ele_t'], ['COOH_t']], [['COOH_t', 'H_g', 'ele_g'], ['COOH-H-ele_t'], ['CO_t', 'H2O_g', 't']], [['CO_t'], ['echemTS-6-0.60_t'], ['CO_g', 't']], [['CO2_g', 'H_t', 'ele_g', 't'], ['H-CO2-ele_t'], ['HCOO_t']], [['HCOO_t', 'H_g', 'ele_g'], ['HCOO-H-ele_t'], ['HCOOH_g', 't', 't']])
+
+estimate_frequencies = True
+
+extrapolate_coverages = False
+
+fixed_entropy_dict = {'H2_g': 0.00135, 'other': 0.002}
+
+force_recalculation = True
+
+force_recompilation = False
+
+frequency_dict = {'t': [], 'H_g': [], 'ele_g': [], 'CO_g': [0.004083343841532469, 0.006033504316662417, 0.2666271947115115], 'H2_g': [0.0008195024527149362, 0.0009190869911306729, 0.5512386313767775], 'H2O_g': [0.002781813471956813, 0.003436715035383926, 0.009369120703280782, 0.20016403465901214, 0.4633180622538471, 0.47707975612222003], 'CO2_g': [0.023197592351904776, 0.023262499767220134, 0.08055024005496506, 0.08074496364488003, 0.16605659600710582, 0.2932393795960964], 'HCOOH_g': [0.005421293133508172, 0.008019900758930108, 0.013007090852755315, 0.07843745705632954, 0.08373712496918376, 0.12643144951248622, 0.135060373274083, 0.15863092018579852, 0.17087233003117402, 0.21984192147542572, 0.3742355358952649, 0.45261594392902915], 'COOH_t': [0.006206259444604573, 0.020922802335522774, 0.026344152256520054, 0.03493518485801423, 0.03727894919726092, 0.04602208226693223, 0.08030054239865649, 0.08391250473986615, 0.13304646007549598, 0.15539296583559106, 0.18462756005538528, 0.4360262797579601], 'CO_t': [0.252927768, 0.03805075098, 0.03325256244, 0.03237227462000001, 0.012361224740000001, 0.00851771454], 'OH_t': [0.00438904068, 0.01572119656, 0.03817473518, 0.06345511356000001, 0.06620756280000001, 0.4538937577800001], 'H_t': [0.056970739900000004, 0.06980310460000001, 0.12340147426], 'HCOO_t': [0.01431518770098593, 0.017413615057217308, 0.032702596340026535, 0.03694512422671654, 0.043387300635234285, 0.09231131615767113, 0.12482574180622438, 0.16333535433644925, 0.1676184931535196, 0.18847328560321353, 0.36939176016122177], 'CO2-H-ele_t': [], 'COOH-H-ele_t': [], 'HCOO-H-ele_t': [], 'H-CO2-ele_t': [], 'H-H_t': [0.01600636022, 0.027065750860000005, 0.05290405814, 0.50625228544], 'H-ele_t': [0.11190813892000001, 0.14945055468000001, 0.22129939858000003], 'H2-ele_t': [0.052147754520000006, 0.05525975794, 0.09911296948000001, 0.13376655338000001, 0.14198670584000003, 0.23754132878000003], '*_t': [], 'g': [], '*_g': [], 'echemTS-6-0.60_t': []}
+
+frequency_surface_names = []
+
+frequency_unit_conversion = 0.0001239842
+
+gas_names = ('CO2_g', 'CO_g', 'H2O_g', 'H2_g', 'HCOOH_g', 'H_g', 'ele_g')
+
+gas_pressures = [1.0, 0.055, 0.035, 0.3, 2e-05, 1.0, 1.0]
+
+gas_thermo_mode = 'ideal_gas'
+
+hbond_dict = {'COOH': -0.25, 'OCHO': 0.0, 'CO': -0.1, 'CHO': -0.1, 'CH2O': 0.0, 'OCH3': 0.0, 'O': 0.0, 'OH': -0.5, 'H': 0.0, 'COH': -0.25, 'C': 0.0, 'CH': 0.0, 'CH2': 0.0, 'CH3': 0.0, 'CHOH': -0.25, 'COHOH': -0.25, 'OCH2O': 0.0, 'CH2OH': -0.25, 'OCHCH2': 0.0, 'OCHCHO': 0.0}
+
+hindered_ads_params = {}
+
+ideal_gas_params = {'H2_g': [2, 'linear', 0], 'N2_g': [2, 'linear', 0], 'O2_g': [2, 'linear', 1.0], 'H2O_g': [2, 'nonlinear', 0], 'CO_g': [1, 'linear', 0], 'CH4_g': [12, 'nonlinear', 0], 'NH3_g': [3, 'nonlinear', 0], 'CH3OH_g': [1, 'nonlinear', 0], 'CH3CH2OH_g': [1, 'nonlinear', 0], 'CO2_g': [2, 'linear', 0], 'CH2O_g': [2, 'nonlinear', 0], 'HCOOH_g': [1, 'nonlinear', 0], 'CH2CH2_g': [4, 'nonlinear', 0], 'CH3CHCH2_g': [1, 'nonlinear', 0], 'CH3CH2CHCH2_g': [1, 'nonlinear', 0], 'CH3CHCHCH3_g': [2, 'nonlinear', 0], 'CH3CH3CCH2_g': [2, 'nonlinear', 0], 'pe_g': [2, 'linear', 0], 'C2H2_g': [2, 'linear', 0], 'C2H4_g': [4, 'nonlinear', 0], 'C2H6_g': [6, 'nonlinear', 0], 'C3H6_g': [1, 'nonlinear', 0], 'CH3COOH_g': [1, 'nonlinear', 0], 'CH3CHO_g': [1, 'nonlinear', 0], 'C5H4O2_g': [1, 'nonlinear', 0], 'C5H6O2_g': [1, 'nonlinear', 0], 'C5H6O_g': [1, 'nonlinear', 0], 'HCl_g': [1, 'linear', 0], 'Cl2_g': [2, 'linear', 0]}
+
+input_file = 'input.txt'
+
+input_overrides_fit = True
+
+interaction_cross_term_names = ('COOH_t&H_t', 'COOH_t&H-ele_t', 'COOH_t&H2-ele_t', 'COOH_t&H-H_t', 'CO_t&H_t', 'CO_t&H-ele_t', 'CO_t&H2-ele_t', 'CO_t&H-H_t', 'HCOO_t&H_t', 'H-ele_t&HCOO_t', 'H2-ele_t&HCOO_t', 'H-H_t&HCOO_t', 'H-ele_t&H_t', 'H2-ele_t&H_t', 'H-H_t&H_t')
+
+interaction_fitting_mode = None
+
+interaction_parameters = [2.9604, 2.467, 2.9604, 0, 1.033, 0.7274, 0.7855920000000001, 0.28368600000000005, 1.1565660000000002, 0.7274, 0.7855920000000001, 0.50918, 1.1565660000000002, 0.7274, 0.7855920000000001, 0.28368600000000005, 1.1565660000000002, 0.0, 0.0, 0.0]
+
+interaction_response_parameters = {'slope': 1, 'cutoff': 0.25, 'smoothing': 0.05}
+
+interaction_scaling_constraint_dict = {'CO_t': [0, 0, None], 'H_t': [0, 0, None], 'OH_t': [0, 0, None], 'COH_t': [0, 0, None], 'CHO_t': [0, 0, None], 'C_t': [0, 0, None], 'CH_t': [0, 0, None], 'CH2_t': [0, 0, None], 'CH3_t': [0, 0, None]}
+
+interaction_strength = 1
+
+interaction_surface_names = None
+
+interaction_transition_state_scaling_matrix = [[0.5, 0, 0, 0, 0], [0.5, 0.5, 0, 0, 0], [0, 0, 0.5, 0.5, 0], [0, 0, 0, 1.0, 0], [0, 0, 0, 0.5, 0], [0, 0, 0, 0.5, 0], [0, 0, 0.5, 0, 0], [0, 0.5, 0, 0, 0]]
+
+internally_constrain_coverages = True
+
+kBT = mpf('0.025851997434000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003')
+
+max_bisections = 5
+
+max_initial_guesses = 3
+
+max_rootfinding_iterations = 200
+
+model_name = 'CO2RtoCO_template'
+
+numAfterPt = 0
+
+numBeforePt = 0
+
+numerical_delta_theta = None
+
+numerical_representation = 'mpmath'
+
+optimize_analytical_expressions = False
+
+output_labels = {'coverage': ('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t'), 'rate': ([['H_g', 'ele_g', 't'], ['H-ele_t'], ['H_t']], [['H_g', 'ele_g', 'H_t'], ['H2-ele_t'], ['H2_g', 't']], [['H_t', 'H_t'], ['H-H_t', 't'], ['H2_g', 't', 't']], [['OH_t', 'H_g', 'ele_g'], ['H2O_g', 't']], [['CO2_g', 'H_g', 'ele_g', 't', 't'], ['CO2-H-ele_t'], ['COOH_t']], [['COOH_t', 'H_g', 'ele_g'], ['COOH-H-ele_t'], ['CO_t', 'H2O_g', 't']], [['CO_t'], ['echemTS-6-0.60_t'], ['CO_g', 't']], [['CO2_g', 'H_t', 'ele_g', 't'], ['H-CO2-ele_t'], ['HCOO_t']], [['HCOO_t', 'H_g', 'ele_g'], ['HCOO-H-ele_t'], ['HCOOH_g', 't', 't']]), 'selectivity': ('CO2_g', 'CO_g', 'H2O_g', 'H2_g', 'HCOOH_g', 'H_g', 'ele_g'), 'interacting_energy': ('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t', 'CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t'), 'production_rate': ('CO2_g', 'CO_g', 'H2O_g', 'H2_g', 'HCOOH_g', 'H_g', 'ele_g'), 'free_energy': ('CO2_g', 'CO_g', 'H2O_g', 'H2_g', 'HCOOH_g', 'H_g', 'ele_g', 'COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t', 'CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t'), 'interaction_matrix': [('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t', 'CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t'), ('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t', 'CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t')]}
+
+output_variables = ['coverage', 'rate', 'production_rate', 'free_energy', 'selectivity', 'interacting_energy', 'interaction_matrix']
+
+pH = 0
+
+parameter_mode = 'formation_energy'
+
+parameter_names = ('COOH_t', 'CO_t', 'HCOO_t', 'H_t', 'OH_t', 'CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t')
+
+parse_headers = ['formation_energy', 'frequencies']
+
+perturbation_size = 1e-14
+
+prefactor = 10000000000000.0
+
+prefactor_list = ['10000000000.0', '10000000.0', '10000000000000.0', 'kB*T/h', '10000.0', 'kB*T/h', '100000000.0', 'kB*T/h', 'kB*T/h']
+
+pressure = 1.0
+
+pressure_mode = 'static'
+
+products = ['CO_g', 'H2O_g', 'H2_g', 'HCOOH_g']
+
+reactants = ['CO2_g', 'H_g', 'ele_g']
+
+recalculate = True
+
+required_headers = ['species_name', 'surface_name', 'site_name', 'formation_energy', 'frequencies', 'reference']
+
+residual_threshold = 0.9
+
+resolution = [27, 1]
+
+rxn_expressions = ['H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65, prefactor=1e10', 'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65, prefactor=1e7', 'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t; prefactor=1e13', 'OH*_t + H_g + ele_g <-> H2O_g + *_t', 'CO2_g + H_g + ele_g +2*_t <-> CO2-H-ele_t <-> COOH_t; beta=0.5, prefactor=1e4', 'COOH_t + H_g + ele_g <-> COOH-H-ele_t <-> CO*_t + H2O_g + *_t; beta=0.5', 'CO_t <-> ^0.60eV_t <-> CO_g + *_t; prefactor=1e8', 'CO2_g + H_t + ele_g + *_t <-> H-CO2-ele_t <-> HCOO_t ; beta=0.5', 'HCOO_t + H_g + ele_g <-> HCOO-H-ele_t <-> HCOOH_g + 2*_t; beta=0.5']
+
+rxn_mechanisms = {'CO2-CO': [5, 6, 7], 'HER_V-H': [1, 2]}
+
+rxn_options_dict = {'prefactor': {0: '1e10', 1: '1e7', 2: '1e13', 4: '1e4', 6: '1e8'}, 'beta': {0: '0.65', 1: '0.65', 4: '0.5', 5: '0.5', 7: '0.5', 8: '0.5'}}
+
+scaling_constraint_dict = {'C_t': ['+', 0.0, None], 'CH_t': ['+', 0.0, None], 'CH2_t': ['+', 0.0, None], 'CH3_t': ['+', 0.0, None], 'OH_t': ['+', 0.0, None], 'CHOH_t': ['+', 0.0, None], 'COH_t': ['+', 0.0, None], 'CHO_t': ['+', 0.0, None], 'H_t': ['+', 0.0, None], 'H-H_t': 'initial_state', 'H-ele_t': 'final_state', 'H2-ele_t': 'initial_state', 'H-CO_t': 'initial_state'}
+
+search_directions = [[0, 0], [0, 1], [1, 0], [0, -1], [-1, 0], [-1, 1], [1, 1], [1, -1], [-1, -1]]
+
+setup_file = 'CO2RtoCO_template.mkm'
+
+shomate_params = {'H2_g:298-1000': [33.066178, -11.363417, 11.432816, -2.772874, -0.158558, -9.980797, 172.707974, 0], 'H2_g:1000-2500': [18.563083, 12.257357, -2.859786, 0.268238, 1.97799, -1.147438, 156.288133, 0], 'H2_g:2500-6000': [43.41356, -4.293079, 1.272428, -0.096876, -20.533862, -38.515158, 162.081354, 0], 'CH4_g:298-1300': [-0.703029, 108.4773, -42.52157, 5.862788, 0.678565, -76.84376, 158.7163, -74.8731], 'CH4_g:1300-1600': [85.81217, 11.26467, -2.114146, 0.13819, -26.42221, -153.5327, 224.4143, -74.8731], 'CO_g:298-1300': [25.56759, 6.09613, 4.054656, -2.671201, 0.131021, -118.0089, 227.3665, -110.5271], 'CO_g:1300-1600': [35.1507, 1.300095, -0.205921, 0.01355, -3.28278, -127.8375, 231.712, -110.5271], 'H2O_g:100-500': [36.303952, -24.11232, 63.64111, -38.9524, -0.01385, -10.23966, 237.39431, 0.0], 'H2O_g:500-1700': [30.092, 6.832514, 6.793435, -2.53448, 0.082139, -250.881, 223.3967, -241.8264], 'H2O_g:1700-6000': [41.96426, 8.622053, -1.49978, 0.098119, -11.15764, -272.1797, 219.7809, -241.8264], 'CO2_g:298-1200': [24.99735, 55.18696, -33.69137, 7.948387, -0.136638, -403.6075, 228.2431, -393.5224], 'CO2_g:1200-6000': [58.16639, 2.720075, -0.492289, 0.038844, -6.447293, -425.9186, 263.6125, -393.5224], 'O2_g:100-700': [31.32234, -20.23531, 57.8664, -36.50624, -0.007374, -8.903471, 246.7945, 0.0], 'O2_g:700-2000': [30.03235, 8.772972, -3.988133, 0.788313, -0.741599, -11.32468, 236.1663, 0.0], 'O2_g:2000-6000': [20.91111, 10.72071, -2.020498, 0.146449, 9.245722, 5.337651, 237.6185, 0.0], 'NH3_g:298-1400': [19.99563, 49.77119, -15.37599, 1.921168, 0.189174, -53.30667, 203.8591, -45.89806], 'N2_g:100-500': [28.98641, 1.853978, -9.647459, 16.63537, 0.000117, -8.671914, 226.4168, 0.0], 'N2_g:500-2000': [19.50583, 19.88705, -8.598535, 1.369784, 0.527601, -4.935202, 212.39, 0.0], 'N2O_g:298-1400': [27.67988, 51.14898, -30.64454, 6.847911, -0.157906, 71.24934, 238.6164, 82.04824], 'NO2_g:298-1200': [16.10857, 75.89525, -54.3874, 14.30777, 0.239423, 26.17464, 240.5386, 33.09502], 'NO_g:298-1200': [23.83491, 12.58878, -1.139011, -1.497459, 0.214194, 83.35783, 237.1219, 90.29114], 'NO3_g:298-1200': [11.22316, 166.3889, -148.4458, 47.40598, -0.176791, 61.00858, 221.7679, 71.128], 'HNO2_g:298-1200': [24.89974, 91.37563, -64.84614, 17.92007, -0.134737, -88.13596, 254.2671, -76.73498], 'HNO3_g:298-1200': [19.63229, 153.9599, -115.8378, 32.87955, -0.249114, -146.8818, 247.7049, -134.306], 'HCN_g:298-1200': [32.69373, 22.59205, -4.369142, -0.407697, -0.282399, 123.4811, 233.2597, 135.1432], 'CH2CH2_g:298-1200': [-6.38788, 184.4019, -112.9718, 28.49593, 0.31554, 48.17332, 163.1568, 52.46694], 'CH2O_g:298-1500': [5.193767, 93.23249, -44.85457, 7.882279, 0.551175, -119.3591, 202.4663, -115.8972], 'CH3OH_g:298-1500': [-1.0845814245433651, 153.2463565199489, -79.53050359618254, 16.47130239316011, 0.5220334601533215, -4.897417024069, 199.1893745506112, 0.0], 'C5H4O2_g:100-1500': [-16.36694, 0.46958, -0.000331925, 8.50912e-08, 198590.9145, -1661.34999, -15.68938, 12461.34999], 'C5H6O2_g:100-1500': [-18.57626, 0.50733, -0.000335824, 8.28263e-08, 231619.2141, -6357.53523, 2.75692, 7057.53523], 'C5H6O_g:50-1500': [1.26847, 0.35388, -0.000173962, 2.87427e-08, 48401.71207, -5691.94893, -85.38991, 7191.94893], 'Cl2_g:298-1000': [33.0506, 12.2294, -12.0651, 4.38533, -0.159494, -10.8348, 259.029, 0.0], 'HCl_g:298-1200': [32.12392, -13.45805, 19.86852, -6.853936, -0.049672, -101.6206, 228.6866, -92.31201], 'CH3CH2OH_g:298-1500': [-4.7367880805894265, 271.96181550301463, -169.34946529216657, 43.73860153608533, 0.24643430702178773, -9.828280829187861, 203.3325622617075, 0.0], 'CH3CHO_g:298-1500': [4.8037386340099095, 185.92002366990326, -99.1084610902012, 20.61473919069016, 0.2770802548558646, -8.566600040790945, 220.00244674443837, 0.0], 'HCOOH_g:298-1500': [3.802752304225226, 153.66217894746168, -84.64046773816926, 16.297377707561505, 0.2772064997263338, -6.16527, 212.9698972559699, 0]}
+
+site_names = ('t', 'g')
+
+species = 'H-CO2-ele_t'
+
+standard_coadsorbate_coverage = 'min'
+
+standard_coverage = 'min'
+
+surface_names = ('Cu',)
+
+temperature = 300.0
+
+thermodynamic_corrections = ['gas', 'adsorbate', 'electrochemical']
+
+thermodynamic_variables = ['temperature', 'gas_pressures', 'voltage', 'beta', 'pH', 'Upzc', 'gas_thermo_mode', 'adsorbate_thermo_mode']
+
+tolerance = 1e-25
+
+transition_state_cross_interaction_mode = 'intermediate_state'
+
+transition_state_names = ('CO2-H-ele_t', 'COOH-H-ele_t', 'H-CO2-ele_t', 'H-H_t', 'H-ele_t', 'H2-ele_t', 'HCOO-H-ele_t', 'echemTS-6-0.60_t')
+
+verbose = 1
+
+voltage = 0.0
+
+stdout = """mapper_iteration_0: status - 27 points do not have valid solution.
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 265404.29202825495)
+minresid_iteration_0: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 5242910167.849719 (residual = 265404.29202825495)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00797053934883032)
+minresid_iteration_1: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 6214844830777.865 (residual = 0.00797053934883032)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00797053934883032)
+minresid_iteration_2: fail - [ 0.00,300.00] using coverages from [ 0.00,300.00]; initial residual was 2849646163314.3354 (residual = 0.00797053934883032)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00795974844697154)
+minresid_iteration_0: fail - [-0.05,300.00] using coverages from [-0.05,300.00]; initial residual was 6250819640727.811 (residual = 0.00795974844697154)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.007977370511029284)
+minresid_iteration_0: fail - [-0.11,300.00] using coverages from [-0.11,300.00]; initial residual was 6250812154546.115 (residual = 0.007977370511029284)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00807426716616338)
+minresid_iteration_0: fail - [-0.16,300.00] using coverages from [-0.16,300.00]; initial residual was 6250809512304.45 (residual = 0.00807426716616338)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00846330886077372)
+minresid_iteration_0: fail - [-0.22,300.00] using coverages from [-0.22,300.00]; initial residual was 6250808579727.431 (residual = 0.00846330886077372)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.009976481688445444)
+minresid_iteration_0: fail - [-0.27,300.00] using coverages from [-0.27,300.00]; initial residual was 6250808250575.139 (residual = 0.009976481688445444)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.015839227623337546)
+minresid_iteration_0: fail - [-0.32,300.00] using coverages from [-0.32,300.00]; initial residual was 6250808134401.109 (residual = 0.015839227623337546)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.03854336124363298)
+minresid_iteration_0: fail - [-0.38,300.00] using coverages from [-0.38,300.00]; initial residual was 6250808093397.581 (residual = 0.03854336124363298)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.12646237485536316)
+minresid_iteration_0: fail - [-0.43,300.00] using coverages from [-0.43,300.00]; initial residual was 6250808078925.419 (residual = 0.12646237485536316)
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 73.0024101056186)
+minresid_iteration_0: fail - [-0.48,300.00] using coverages from [-0.48,300.00]; initial residual was 6250808073817.481 (residual = 73.0024101056186)
+rootfinding_iteration_18: fail - stagnated or diverging (residual = 0.34084812607934695)
+minresid_iteration_0: fail - [-0.54,300.00] using coverages from [-0.54,300.00]; initial residual was 6250808072014.64 (residual = 0.34084812607934695)
+rootfinding_iteration_14: fail - stagnated or diverging (residual = 0.1635946300875514)
+minresid_iteration_0: fail - [-0.59,300.00] using coverages from [-0.59,300.00]; initial residual was 6250808071378.327 (residual = 0.1635946300875514)
+rootfinding_iteration_10: fail - stagnated or diverging (residual = 0.12091532722365579)
+minresid_iteration_0: fail - [-0.65,300.00] using coverages from [-0.65,300.00]; initial residual was 6250808071153.742 (residual = 0.12091532722365579)
+rootfinding_iteration_8: fail - stagnated or diverging (residual = 0.12323672133568625)
+minresid_iteration_0: fail - [-0.70,300.00] using coverages from [-0.70,300.00]; initial residual was 6250808071074.475 (residual = 0.12323672133568625)
+rootfinding_iteration_9: fail - stagnated or diverging (residual = 0.039373182375674595)
+minresid_iteration_0: fail - [-0.75,300.00] using coverages from [-0.75,300.00]; initial residual was 6250808071046.497 (residual = 0.039373182375674595)
+rootfinding_iteration_11: fail - stagnated or diverging (residual = 0.010208923760019315)
+minresid_iteration_0: fail - [-0.81,300.00] using coverages from [-0.81,300.00]; initial residual was 6250808071036.623 (residual = 0.010208923760019315)
+rootfinding_iteration_8: fail - stagnated or diverging (residual = 0.05712682505309713)
+minresid_iteration_0: fail - [-0.86,300.00] using coverages from [-0.86,300.00]; initial residual was 6250808071033.138 (residual = 0.05712682505309713)
+minresid_iteration_0: success - [-0.92,300.00] using coverages from [-0.92,300.00]
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 6.939529751857373)
+minresid_iteration_0: fail - [-0.97,300.00] using coverages from [-0.97,300.00]; initial residual was 6250808071031.473 (residual = 6.939529751857373)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.023593486103000733)
+minresid_iteration_1: fail - [-0.97,300.00] using coverages from [-0.92,300.00]; initial residual was 0.033109471248575835 (residual = 0.023593486103000733)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.023593486103000733)
+bisection_iteration_1: fail - move from [-0.92,300.00] to [-0.97,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.008859636757773025)
+bisection_iteration_2: fail - move from [-0.92,300.00] to [-0.94,300.00]
+bisection_iteration_3: success - moved from [-0.92,300.00] to [-0.93,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.016895721156500527)
+bisection_iteration_1: fail - move from [-0.93,300.00] to [-0.97,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.007791406772501878)
+bisection_iteration_2: fail - move from [-0.93,300.00] to [-0.95,300.00]
+bisection_iteration_3: success - moved from [-0.93,300.00] to [-0.94,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.009230688230337703)
+bisection_iteration_1: fail - move from [-0.94,300.00] to [-0.97,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.004746656865787193)
+bisection_iteration_2: fail - move from [-0.94,300.00] to [-0.95,300.00]
+bisection_iteration_3: success - moved from [-0.94,300.00] to [-0.95,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.007319648821657596)
+bisection_iteration_1: fail - move from [-0.95,300.00] to [-0.97,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.00283828582556459)
+bisection_iteration_2: fail - move from [-0.95,300.00] to [-0.96,300.00]
+bisection_iteration_3: success - moved from [-0.95,300.00] to [-0.95,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.008115841881933634)
+bisection_iteration_1: fail - move from [-0.95,300.00] to [-0.97,300.00]
+bisection_iteration_2: success - moved from [-0.95,300.00] to [-0.96,300.00]
+bisection_iteration_1: success - moved from [-0.96,300.00] to [-0.97,300.00]
+minresid_iteration_0: success - [-0.97,300.00] using coverages from [-0.9153846153846154, 300.0]
+rootfinding_iteration_7: fail - stagnated or diverging (residual = 17.50783031527159)
+minresid_iteration_0: fail - [-1.02,300.00] using coverages from [-1.02,300.00]; initial residual was 6250808071031.32 (residual = 17.50783031527159)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 0.034466248379558806)
+minresid_iteration_1: fail - [-1.02,300.00] using coverages from [-0.97,300.00]; initial residual was 0.0543815586083183 (residual = 0.034466248379558806)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 0.034466248379558806)
+bisection_iteration_1: fail - move from [-0.97,300.00] to [-1.02,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.012044642404852538)
+bisection_iteration_2: fail - move from [-0.97,300.00] to [-1.00,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.006497729386170021)
+bisection_iteration_3: fail - move from [-0.97,300.00] to [-0.98,300.00]
+bisection_iteration_4: success - moved from [-0.97,300.00] to [-0.98,300.00]
+rootfinding_iteration_5: fail - stagnated or diverging (residual = 0.027655546712705977)
+bisection_iteration_1: fail - move from [-0.98,300.00] to [-1.02,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.009782584128286748)
+bisection_iteration_2: fail - move from [-0.98,300.00] to [-1.00,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.005456348507074858)
+bisection_iteration_3: fail - move from [-0.98,300.00] to [-0.99,300.00]
+bisection_iteration_4: success - moved from [-0.98,300.00] to [-0.98,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.03631674128304899)
+bisection_iteration_1: fail - move from [-0.98,300.00] to [-1.02,300.00]
+bisection_iteration_2: success - moved from [-0.98,300.00] to [-1.00,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.01163120845550918)
+bisection_iteration_1: fail - move from [-1.00,300.00] to [-1.02,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.006752913954903536)
+bisection_iteration_2: fail - move from [-1.00,300.00] to [-1.01,300.00]
+bisection_iteration_3: success - moved from [-1.00,300.00] to [-1.01,300.00]
+bisection_iteration_1: success - moved from [-1.01,300.00] to [-1.02,300.00]
+minresid_iteration_0: success - [-1.02,300.00] using coverages from [-0.9692307692307691, 300.0]
+rootfinding_iteration_7: fail - stagnated or diverging (residual = 70.70153602828908)
+minresid_iteration_0: fail - [-1.08,300.00] using coverages from [-1.08,300.00]; initial residual was 6250808071031.266 (residual = 70.70153602828908)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.07592179931828039)
+minresid_iteration_1: fail - [-1.08,300.00] using coverages from [-1.02,300.00]; initial residual was 0.08921886663875056 (residual = 0.07592179931828039)
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.07592179931828039)
+bisection_iteration_1: fail - move from [-1.02,300.00] to [-1.08,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.02562545126297171)
+bisection_iteration_2: fail - move from [-1.02,300.00] to [-1.05,300.00]
+bisection_iteration_3: success - moved from [-1.02,300.00] to [-1.04,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.047022996832676446)
+bisection_iteration_1: fail - move from [-1.04,300.00] to [-1.08,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.016517930056568847)
+bisection_iteration_2: fail - move from [-1.04,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.008846036517387539)
+bisection_iteration_3: fail - move from [-1.04,300.00] to [-1.05,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.0027871593099039354)
+bisection_iteration_4: fail - move from [-1.04,300.00] to [-1.04,300.00]
+bisection_iteration_5: success - moved from [-1.04,300.00] to [-1.04,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.04557599818385636)
+bisection_iteration_1: fail - move from [-1.04,300.00] to [-1.08,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.01485271475840935)
+bisection_iteration_2: fail - move from [-1.04,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.008054486735164689)
+bisection_iteration_3: fail - move from [-1.04,300.00] to [-1.05,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.002554441022942205)
+bisection_iteration_4: fail - move from [-1.04,300.00] to [-1.04,300.00]
+bisection_iteration_5: success - moved from [-1.04,300.00] to [-1.04,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.039996245464715856)
+bisection_iteration_1: fail - move from [-1.04,300.00] to [-1.08,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.017338020979874153)
+bisection_iteration_2: fail - move from [-1.04,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.010302686174899194)
+bisection_iteration_3: fail - move from [-1.04,300.00] to [-1.05,300.00]
+bisection_iteration_4: success - moved from [-1.04,300.00] to [-1.05,300.00]
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 0.03311889254751698)
+bisection_iteration_1: fail - move from [-1.05,300.00] to [-1.08,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.013532266962383997)
+bisection_iteration_2: fail - move from [-1.05,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.008385022520020876)
+bisection_iteration_3: fail - move from [-1.05,300.00] to [-1.05,300.00]
+bisection_iteration_4: success - moved from [-1.05,300.00] to [-1.05,300.00]
+rootfinding_iteration_5: fail - stagnated or diverging (residual = 0.02460009924018521)
+bisection_iteration_1: fail - move from [-1.05,300.00] to [-1.08,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.010722353501013663)
+bisection_iteration_2: fail - move from [-1.05,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.006772932096021569)
+bisection_iteration_3: fail - move from [-1.05,300.00] to [-1.06,300.00]
+bisection_iteration_4: success - moved from [-1.05,300.00] to [-1.05,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.033081398124646166)
+bisection_iteration_1: fail - move from [-1.05,300.00] to [-1.08,300.00]
+rootfinding_iteration_3: fail - stagnated or diverging (residual = 0.008465011157006822)
+bisection_iteration_2: fail - move from [-1.05,300.00] to [-1.07,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.005434629159851615)
+bisection_iteration_3: fail - move from [-1.05,300.00] to [-1.06,300.00]
+bisection_iteration_4: success - moved from [-1.05,300.00] to [-1.06,300.00]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 0.025279206681756174)
+bisection_iteration_1: fail - move from [-1.06,300.00] to [-1.08,300.00]
+bisection_iteration_2: success - moved from [-1.06,300.00] to [-1.07,300.00]
+bisection_iteration_1: success - moved from [-1.07,300.00] to [-1.08,300.00]
+minresid_iteration_0: success - [-1.08,300.00] using coverages from [-1.023076923076923, 300.0]
+rootfinding_iteration_2: fail - stagnated or diverging (residual = 20783.342335183315)
+minresid_iteration_0: fail - [-1.13,300.00] using coverages from [-1.13,300.00]; initial residual was 6250808071031.247 (residual = 20783.342335183315)
+minresid_iteration_1: success - [-1.13,300.00] using coverages from [-1.08,300.00]
+rootfinding_iteration_6: fail - stagnated or diverging (residual = 5.2159119461799275)
+minresid_iteration_0: fail - [-1.18,300.00] using coverages from [-1.18,300.00]; initial residual was 6250808071031.24 (residual = 5.2159119461799275)
+minresid_iteration_1: success - [-1.18,300.00] using coverages from [-1.13,300.00]
+rootfinding_iteration_5: fail - stagnated or diverging (residual = 28.238703646258312)
+minresid_iteration_0: fail - [-1.24,300.00] using coverages from [-1.24,300.00]; initial residual was 6250808071031.237 (residual = 28.238703646258312)
+minresid_iteration_1: success - [-1.24,300.00] using coverages from [-1.18,300.00]
+minresid_iteration_0: success - [-1.29,300.00] using coverages from [-1.29,300.00]
+rootfinding_iteration_6: fail - stagnated or diverging (residual = 7.897322614385379)
+minresid_iteration_0: fail - [-1.35,300.00] using coverages from [-1.35,300.00]; initial residual was 6250808071031.236 (residual = 7.897322614385379)
+minresid_iteration_1: success - [-1.35,300.00] using coverages from [-1.29,300.00]
+minresid_iteration_0: success - [-1.40,300.00] using coverages from [-1.40,300.00]
+mapper_iteration_1: status - 17 points do not have valid solution.
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 0.0026941028397566608)
+minresid_iteration_0: fail - [-0.86,300.00] using coverages from [-0.92,300.00]; initial residual was 0.006131714049806783 (residual = 0.0026941028397566608)
+rootfinding_iteration_4: fail - stagnated or diverging (residual = 0.0026941028397566608)
+bisection_iteration_1: fail - move from [-0.92,300.00] to [-0.86,300.00]
+bisection_iteration_2: success - moved from [-0.92,300.00] to [-0.89,300.00]
+bisection_iteration_1: success - moved from [-0.89,300.00] to [-0.86,300.00]
+minresid_iteration_0: success - [-0.86,300.00] using coverages from [-0.9153846153846154, 300.0]
+mapper_iteration_2: status - 16 points do not have valid solution.
+minresid_iteration_0: success - [-0.81,300.00] using coverages from [-0.86,300.00]
+mapper_iteration_3: status - 15 points do not have valid solution.
+minresid_iteration_0: success - [-0.75,300.00] using coverages from [-0.81,300.00]
+mapper_iteration_4: status - 14 points do not have valid solution.
+minresid_iteration_0: success - [-0.70,300.00] using coverages from [-0.75,300.00]
+mapper_iteration_5: status - 13 points do not have valid solution.
+minresid_iteration_0: success - [-0.65,300.00] using coverages from [-0.70,300.00]
+mapper_iteration_6: status - 12 points do not have valid solution.
+minresid_iteration_0: success - [-0.59,300.00] using coverages from [-0.65,300.00]
+mapper_iteration_7: status - 11 points do not have valid solution.
+minresid_iteration_0: success - [-0.54,300.00] using coverages from [-0.59,300.00]
+mapper_iteration_8: status - 10 points do not have valid solution.
+minresid_iteration_0: success - [-0.48,300.00] using coverages from [-0.54,300.00]
+mapper_iteration_9: status - 9 points do not have valid solution.
+minresid_iteration_0: success - [-0.43,300.00] using coverages from [-0.48,300.00]
+mapper_iteration_10: status - 8 points do not have valid solution.
+minresid_iteration_0: success - [-0.38,300.00] using coverages from [-0.43,300.00]
+mapper_iteration_11: status - 7 points do not have valid solution.
+minresid_iteration_0: success - [-0.32,300.00] using coverages from [-0.38,300.00]
+mapper_iteration_12: status - 6 points do not have valid solution.
+minresid_iteration_0: success - [-0.27,300.00] using coverages from [-0.32,300.00]
+mapper_iteration_13: status - 5 points do not have valid solution.
+minresid_iteration_0: success - [-0.22,300.00] using coverages from [-0.27,300.00]
+mapper_iteration_14: status - 4 points do not have valid solution.
+minresid_iteration_0: success - [-0.16,300.00] using coverages from [-0.22,300.00]
+mapper_iteration_15: status - 3 points do not have valid solution.
+minresid_iteration_0: success - [-0.11,300.00] using coverages from [-0.16,300.00]
+mapper_iteration_16: status - 2 points do not have valid solution.
+minresid_iteration_0: success - [-0.05,300.00] using coverages from [-0.11,300.00]
+mapper_iteration_17: status - 1 points do not have valid solution.
+minresid_iteration_0: success - [ 0.00,300.00] using coverages from [-0.05,300.00]
+mapper_iteration_18: status - 0 points do not have valid solution.
+header_evaluation: fail - could not save atoms_dict = {'CO2_g': Atoms(symbols='CO2', pbc=False), 'CO_g': Atoms(symbols='OC', pbc=False), 'H2O_g': Atoms(symbols='OH2', pbc=False), 'H2_g': Atoms(symbols='H2', pbc=False), 'HCOOH_g': Atoms(symbols='OCOH2', pbc=False), 'H_g': Atoms(symbols='H', pbc=False, initial_magmoms=...)}
+
+"""
