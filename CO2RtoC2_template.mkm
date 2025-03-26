@@ -2,12 +2,12 @@ scaler = 'ThermodynamicScaler'
 
 rxn_expressions = [
 
-    'H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65',	# Volmer 1
-    'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65',     # Heyrovsky 2
+    'H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65, prefactor=1e10',	# Volmer 1
+    'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65, prefactor=1e7',     # Heyrovsky 2
     'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t; prefactor=1e13',     # Tafel 3
     'OH*_t + H_g + ele_g <-> H2O_g + *_t',	#4
 
-	'CO2_g + H_g + ele_g +2*_t <-> CO2-H-ele_t <-> COOH_t; beta=0.5', #5 Electro_COOH
+	'CO2_g + H_g + ele_g +2*_t <-> CO2-H-ele_t <-> COOH_t; beta=0.5, prefactor=1e4', #5 Electro_COOH
 	'COOH_t + H_g + ele_g <-> COOH-H-ele_t <-> CO*_t + H2O_g + *_t; beta=0.5', #6 Electro_CO
 	'CO_t <-> ^0.60eV_t <-> CO_g + *_t; prefactor=1e8', #7 CO desorption
 
@@ -34,8 +34,8 @@ rxn_expressions = [
     'CH3*_t + H*_t <-> CH3-H*_t + *_t <-> CH4_g + 2*_t; prefactor=1e13',	#23
 
     'O2_g + *_t -> O2*_t',     #24 fake ads
-    'CO*_t + C*_t <-> OC-C*_t <-> OCC*_t + *_t', #Thermo_CCO_surface 25
-    'CO_g + C*_t <-> C-CO*_t  <-> OCC*_t ', #Thermo_CCO_gas 26
+    'CO*_t + C*_t <-> OC-C*_t <-> OCC*_t + *_t; prefactor=1e11', #Thermo_CCO_surface 25
+    'CO_g + C*_t <-> C-CO*_t  <-> OCC*_t ; prefactor=1e9', #Thermo_CCO_gas 26
     'OCC*_t + H_g + ele_g <-> OCC-H-ele_t <-> OCCH_t; beta=0.5', #27    
     #'OCC*_t + H_g + ele_g <-> OCCH_t', #23
     'OCCH*_t + 5H_g + 5ele_g <-> C2H4_g + H2O_g + *_t', #28
@@ -43,7 +43,7 @@ rxn_expressions = [
     '2CO_t <-> OCCO_t', # OCCO dimerization 30
     'OCCO_t + H_g + ele_g <-> OCCO-H-ele_t <-> OCCOH_t; beta=0.5', # 31
     'OCCOH_t + H_g + ele_g <-> OCC_t + H2O_g + *_t; beta=0.5', # 32
-    'CO_t + CH_t <-> OC-CH_t <-> OCCH_t + *_t', #33
+    'CO_t + CH_t <-> OC-CH_t <-> OCCH_t + *_t; prefactor=1e13', #33
     'CO*_t + H_g + ele_g <-> H-CO-ele*_t <-> CHO*_t; beta=0.5',	# Electro_CHO #34
 ]
 

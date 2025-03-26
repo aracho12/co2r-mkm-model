@@ -1,14 +1,18 @@
 scaler = 'ThermodynamicScaler'
 
 rxn_expressions = [
-    'H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65',	# Volmer 1
-    'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65',     # Heyrovsky 2
-    'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t',     # Tafel 3
+    'H_g + ele_g + *_t <-> H-ele*_t <-> H*_t; beta=0.65, prefactor=1e10',	# Volmer 1
+    'H_g + ele_g + H*_t -> H2-ele*_t -> H2_g + *_t; beta=0.65, prefactor=1e7',     # Heyrovsky 2
+    'H*_t + H*_t -> H-H*_t + *_t -> H2_g + 2*_t; prefactor=1e13',     # Tafel 3
     'OH*_t + H_g + ele_g <-> H2O_g + *_t',	#4
 
-	'CO2_g + 2*_t + ele_g +H_g-> CO2-H-ele_t <->  COOH*_t; beta=0.5', 	#5
-	'COOH*_t + H_g + ele_g  <-> COOH-H-ele_t <-> CO*_t + H2O_g + *_t ; beta = 0.5', #6
-	'CO*_t <-> CO_g + *_t; prefactor=1e8',	#7
+	'CO2_g + H_g + ele_g +2*_t <-> CO2-H-ele_t <-> COOH_t; beta=0.5, prefactor=1e4', #5 Electro_COOH
+	'COOH_t + H_g + ele_g <-> COOH-H-ele_t <-> CO*_t + H2O_g + *_t; beta=0.5', #6 Electro_CO
+	'CO_t <-> ^0.60eV_t <-> CO_g + *_t; prefactor=1e8', #7 CO desorption
+
+	'CO2_g + H_t + ele_g + *_t <-> H-CO2-ele_t <-> HCOO_t ; beta=0.5', #8 Electro_HCOO
+	'HCOO_t + H_g + ele_g <-> HCOO-H-ele_t <-> HCOOH_g + 2*_t; beta=0.5', #9 Electro_HCOOH
+
 	
 ]
 
@@ -97,7 +101,7 @@ interaction_scaling_constraint_dict = {
 				'CH3_t':[0,0,None],
                           }
 
-interaction_strength = $strength
+interaction_strength = 1
 
 if 1 == len(surface_names):
 	numBeforePt = 0
@@ -193,7 +197,7 @@ species_definitions['COOH_t'] = {
                 }
 
 
-for species in ['COOH_t','CO2_t','HCOO_t','CO2-H-ele_t','COOH-H-ele_t']:
+for species in ['COOH_t','CO2_t','HCOO_t','CO2-H-ele_t','COOH-H-ele_t', 'HCOO_t', 'HCOO-H-ele_t','H-CO2-ele_t']:
 	species_definitions[species] = species_definitions['COOH_t']
                 
 
